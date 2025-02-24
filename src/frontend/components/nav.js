@@ -1,4 +1,4 @@
-import { activePath } from "../../main.js";
+import { activePath } from "../main.js";
 
 class Nav extends HTMLElement {
     constructor() {

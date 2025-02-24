@@ -19,10 +19,9 @@ class SignIn extends HTMLElement {
             this.password = e.target.value;
         };
 
-        let button = this.querySelector('button')
+        let button = this.querySelector('button');
         button.onclick = () => {
             this.monitor.isLoading = true;
-            console.log(this.username, this.password);
             this.render();
         }
     }
