@@ -1,22 +1,21 @@
 import Home from "./components/views/home.js";
 
-console.log("test");
-
 const routes = {
-    "/": { title: "3615 | Home", render: Home },
-    //"/about": { title: "About", render: about },
-    //"/contact": { title: "Contact", render: contact },
+    "/": { title: "3615 - Home", render: Home },
+    "/sign": { title: "3615 - Sign", render: Home },
+    "/messages": { title: "3615 - Messages", render: Home },
 };
 
-function router() {
-    let view = routes[location.pathname];
+export let activePath = '/';
 
+function router(path = "/") {
+    let view = routes[path];
+    activePath = path;
     if (view) {
         document.title = view.title;
         app.innerHTML = view.render();
     } else {
-        history.replaceState("", "", "/");
-        router();
+        router("/");
     }
 };
 
@@ -24,11 +23,10 @@ function router() {
 window.addEventListener("click", e => {
     if (e.target.matches("[data-link]")) {
         e.preventDefault();
-        history.pushState("", "", e.target.href);
-        router();
+        const path = e.target.getAttribute("href");
+        router(path);
     }
 });
 
 // Update router
-window.addEventListener("popstate", router);
 window.addEventListener("DOMContentLoaded", router);
