@@ -1,0 +1,49 @@
+@font-face {
+    font-family: 'minitel';
+    src: url('../fonts/Minitel.woff') format('woff');
+  }
+
+:root {
+    --primary: #55a5cf;
+    --secondary: #263b60;
+    --secondary-light: #2c77cc;
+    --accent: #6cccff;
+    --background: #222220;
+
+    font-size: 18px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    font-size: 1rem;
+    box-sizing: border-box;
+    background-color: var(--background);
+    font-family: "minitel";
+    color: var(--primary);
+}
+
+/* TITLE STYLE */
+
+c-title div {
+    /* border: 1px solid var(--accent); */
+    padding: 1rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    width: 100%;
+}
+
+c-title a {
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.spacer {
+    width: 100%;
+}
+
+.highlight {
+    background-color: var(--accent);
+    color: var(--background);
+}
