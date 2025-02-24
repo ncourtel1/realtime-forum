@@ -1,8 +1,9 @@
 import Home from "./components/views/home.js";
+import Sign from "./components/views/sign.js";
 
 const routes = {
     "/": { title: "3615 - Home", render: Home },
-    "/sign": { title: "3615 - Sign", render: Home },
+    "/sign": { title: "3615 - Sign", render: Sign },
     "/messages": { title: "3615 - Messages", render: Home },
 };
 

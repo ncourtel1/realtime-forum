@@ -14,7 +14,8 @@ class Posts extends HTMLElement {
                     <span class="highlight">See Comments</span>
                 </footer>
             </article>
-        `);
+            <div></div>
+        `).join('');
     }
 }
 
