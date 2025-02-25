@@ -1,22 +1,27 @@
 import "./title.js";
 import "./nav.js";
 import "./posts.js";
-import "./sign_in.js";
-
-import { activePath } from "../main.js";
+import "./connection.js";
+import "./register.js";
 
 class App extends HTMLElement {
     constructor() {
         super();
+        this.activePath = "/";
+        this.connected = true;
         this.render();
     }
 
     render() {
+        this.activePath === '/' ? document.title = "3615 - Home" :
+        this.activePath === '/connection' ? document.title = "3615 - Connection" :
+        this.activePath === '/register' ? document.title = "3615 - Register" : '';
         this.innerHTML = `
             <c-title></c-title>
             <c-nav></c-nav>
-            ${activePath === '/' ? '<c-posts></c-posts>' : ''}
-            ${activePath === '/sign' ? '<c-sign-in></c-sign-in>' : ''}
+            ${this.activePath === '/' ? '<c-posts></c-posts>' : ''}
+            ${this.activePath === '/connection' ? '<c-connection></c-connection>' : ''}
+            ${this.activePath === '/register' ? '<c-register></c-register>' : ''}
         `;
     }
 }

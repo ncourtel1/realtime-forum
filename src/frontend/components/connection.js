@@ -1,4 +1,4 @@
-class SignIn extends HTMLElement {
+class Connection extends HTMLElement {
     constructor() {
         super();
         this.username = "";
@@ -49,4 +49,4 @@ class SignIn extends HTMLElement {
     }
 }
 
-customElements.define("c-sign-in", SignIn);
+customElements.define("c-connection", Connection);

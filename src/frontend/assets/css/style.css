@@ -75,9 +75,9 @@ c-posts section, header{
     padding: 0rem 2rem;
 }
 
-/* SIGNIN STYLE */
+/* CONNECTION STYLE */
 
-c-sign-in div {
+c-connection div, c-register div {
     padding: var(--externalPadding);
     display: flex;
     gap: 2rem;
@@ -87,7 +87,7 @@ c-sign-in div {
     height: 70dvh;
 }
 
-c-sign-in label {
+c-connection label, c-register label {
     display: flex;
     align-items: start;
     justify-content: start;
@@ -96,9 +96,11 @@ c-sign-in label {
     width: 60dvw;
 }
 
-c-sign-in input {
+c-connection input, c-register input, select {
     width: 100%;
 }
+
+/* REGISTER STYLE */
 
 /* GENERAL STYLE */
 
@@ -118,6 +120,10 @@ input {
 
 input:focus {
     outline: none;
+}
+
+select {
+  border: none;
 }
 
 button {
