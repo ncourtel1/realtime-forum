@@ -71,11 +71,11 @@ c-posts h1 {
     font-size: 20px;
 }
 
-c-posts section, header{
+c-posts section, c-posts header{
     padding: 0rem 2rem;
 }
 
-/* CONNECTION STYLE */
+/* CONNECTION/REGISTER STYLE */
 
 c-connection div, c-register div {
     padding: var(--externalPadding);
@@ -100,7 +100,80 @@ c-connection input, c-register input, select {
     width: 100%;
 }
 
-/* REGISTER STYLE */
+/* MESSAGES STYLE */
+
+c-messages .messages {
+  display: flex;
+  align-items: start;
+  justify-content: start;
+  padding: var(--externalPadding);
+  gap: 2rem;
+}
+
+c-messages .left {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: start;
+  gap: 2rem
+}
+
+c-messages .left header {
+  width: 100%;
+}
+
+c-messages .left article {
+  width: 100%;
+}
+
+c-messages .left section {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: start;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+c-messages .right {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: start;
+  width: 100%;
+  height: 70dvh;
+  gap: 2rem
+}
+
+c-messages label {
+  width: 100%;
+  display: flex;
+  white-space: nowrap;
+}
+
+c-messages input {
+  width: 100%;
+}
+
+c-messages .right header {
+  width: 100%;
+}
+
+c-messages .right article {
+  width: 100%;
+}
+
+c-messages .right section {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+c-messages .sender {
+  text-align: right;
+}
 
 /* GENERAL STYLE */
 

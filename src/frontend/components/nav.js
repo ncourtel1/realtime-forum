@@ -8,14 +8,14 @@ class Nav extends HTMLElement {
 
     connectedCallback() {
         if (this.connected) {
-        let quit = this.querySelector('#quit');
-        quit.onclick = () => {
-            const app = document.querySelector("c-app");
-            app.connected = false
-            app.activePath = "/";
-            app.render();
+            let quit = this.querySelector('#quit');
+            quit.onclick = () => {
+                const app = document.querySelector("c-app");
+                app.connected = false
+                app.activePath = "/";
+                app.render();
+            }
         }
-    }
     }
 
     render() {
