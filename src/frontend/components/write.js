@@ -1,32 +1,75 @@
 class Write extends HTMLElement {
     constructor() {
         super();
-        this.username = "";
-        this.password = "";
+        this.categories = [];
+        this.newCategory = {name: ""};
+        this.isCategoryExpanded = false;
         this.monitor = { isLoading: false, error: null };
         this.placeHolder = "............................................................................................................................................................................................................................................................................................................................................................................................................";
-        this.render();
+        this.getCategories();
     }
 
     connectedCallback() {
-        let usernameInput = this.querySelector('#username');
-        usernameInput.oninput = (e) => {
-            this.username = e.target.value;
-        };
+        let add = this.querySelector('#add');
+        add.onclick = () => {
+            this.isCategoryExpanded = !this.isCategoryExpanded;
+            this.render();
+            this.connectedCallback();
+        }
+        if (this.isCategoryExpanded) {
+            let newCategoryName = this.querySelector('#new_category');
+            newCategoryName.oninput = (e) => {
+                this.newCategory.name = e.target.value;
+            };
+        
+            let save = this.querySelector('#save');
+            save.onclick = () => {
+                this.createCategory();
+            }
+        }
+    }
 
-        let passwordInput = this.querySelector('#password');
-        passwordInput.oninput = (e) => {
-            this.password = e.target.value;
-        };
+    async createCategory() {
+        try {
+            this.monitor = {isLoading: true, error: null};
+            this.render();
+            const response = await fetch('/create_category', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(this.newCategory)
+            });
+            if (!response.ok) {
+                this.monitor = {isLoading: false, error: `${response.status} ${response.statusText}`};
+                this.render();
+            }
+            await new Promise(resolve => setTimeout(resolve, 500));
+            this.isCategoryExpanded = !this.isCategoryExpanded;
+            this.getCategories();
+        } catch (error) {
+            this.monitor = {isLoading: false, error: error};
+            this.render();
+        }
+    }
 
-        let genderInput = this.querySelector('#category');
-        genderInput.oninput = (e) => {
-            this.user.Gender = e.target.value;
-        };
-
-        let button = this.querySelector('button');
-        button.onclick = () => {
-            this.monitor.isLoading = true;
+    async getCategories() {
+        try {
+            this.monitor = {isLoading: true, error: null};
+            this.render();
+            const response = await fetch('/get_categories');
+            if (!response.ok) {
+                this.monitor = {isLoading: false, error: `${response.status} ${response.statusText}`};
+                this.render();
+            }
+            const data = await response.json();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            this.categories = data;
+            this.monitor = {isLoading: false, error: null};
+            this.render();
+            this.connectedCallback();
+        } catch (error) {
+            this.monitor = {isLoading: false, error: error.message};
             this.render();
         }
     }
@@ -34,7 +77,7 @@ class Write extends HTMLElement {
     render() {
         this.innerHTML = `
             <div>
-            <div class="y_spacer"></div>
+                <div class="y_spacer"></div>
                 <label>
                     Title:
                     <input type="text" id="title" placeholder="${this.placeHolder}" />
@@ -42,15 +85,22 @@ class Write extends HTMLElement {
                 <label>
                     Category:
                     <select id="category">
-                        <option value="undefined">Undefined</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="fluid">Fluid</option>
+                    ${this.categories.map(category => `<option value="${category.name}">${category.name}</option>`).join('')}
                     </select>
                 </label>
                 <label>
-                    <button>+</button>
+                    <button id="add">${this.isCategoryExpanded ? 'Cancel' : '+'}</button>
                 </label>
+                ${this.isCategoryExpanded ?
+                    `
+                    <label>
+                        New Category:
+                        <input type="text" id="new_category" placeholder="${this.placeHolder}" />
+                    </label>
+                    <label>
+                        <button id="save">Save</button>
+                    </label>`
+                     : ''}
                 <label>
                     Post:
                     <textarea id="post" placeholder="${this.placeHolder}"></textarea>

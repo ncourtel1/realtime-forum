@@ -12,7 +12,9 @@ func InitServer() {
 
 	// Add handlers for different routes
 	//server.Handle("/prout", IndexHandler) // Root route
-	server.Handle("/register", db.CreateUser) // About route
+	server.Handle("/register", db.CreateUser)
+	server.Handle("/create_category", db.CreateCategory)
+	server.Handle("/get_categories", db.ReadCategories)
 	// server.Handle("/create-user", db.CreateUser)
 	// server.Handle("/delete-user", db.DeleteUser)
 

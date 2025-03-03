@@ -1,12 +1,18 @@
 package db
 
-import "net/http"
+import (
+	"encoding/json"
+	"net/http"
+)
 
 func CreateCategory(w http.ResponseWriter, r *http.Request) {
 	// Code to create category
 	if r.Method == http.MethodPost {
-		id := r.FormValue("id")
-		name := r.FormValue("name")
+		var category Category
+		if err := json.NewDecoder(r.Body).Decode(&category); err != nil {
+			http.Error(w, "Invalid data", http.StatusBadRequest)
+			return
+		}
 
 		db := SetupDatabase()
 		defer db.Close()
@@ -20,8 +26,8 @@ func CreateCategory(w http.ResponseWriter, r *http.Request) {
 
 		// Insert category into the database
 		insertCategory := `
-		INSERT INTO category (id, name, description, created_at, updated_at) VALUES (?, ?)`
-		_, err = tx.Exec(insertCategory, id, name)
+		INSERT INTO categories (name) VALUES (?)`
+		_, err = tx.Exec(insertCategory, category.Name)
 		if err != nil {
 			tx.Rollback() // Rollback the transaction if there is an error
 			http.Error(w, "Error inserting category", http.StatusInternalServerError)

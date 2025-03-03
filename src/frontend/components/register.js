@@ -81,6 +81,7 @@ class Register extends HTMLElement {
                 this.render();
             }
             const data = await response.json();
+            await new Promise(resolve => setTimeout(resolve, 500));
             this.monitor = {isLoading: false, error: null};
             this.render();
             console.log(data);
