@@ -6,19 +6,16 @@ import (
 	"net/http"
 )
 
-type Communication struct {
-	Message string `json:"Message"`
-	Error   bool   `json:"Error"`
-}
-
 // CreateServer creates a new user in the database
 func CreateUser(w http.ResponseWriter, r *http.Request) {
+	var comm Communication
+
 	if r.Method == http.MethodPost {
 		var user User
 		if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-			http.Error(w, "Invalid data", http.StatusBadRequest)
-			fmt.Println(err)
-			return
+			comm = Communication{Message: "cant decode user", Error: true}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(comm)
 		}
 
 		fmt.Println(user)
@@ -29,8 +26,9 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		// Start a transaction
 		tx, err := db.Begin()
 		if err != nil {
-			http.Error(w, "Error starting transaction", http.StatusInternalServerError)
-			return
+			comm = Communication{Message: "Error starting transaction", Error: true}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(comm)
 		}
 
 		// Insert user into the database
@@ -39,22 +37,25 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		_, err = tx.Exec(insertUser, user.Username, user.Password, user.Email, user.Age, user.Gender, user.FirstName, user.LastName)
 		if err != nil {
 			tx.Rollback() // Rollback the transaction if there is an error
-			http.Error(w, "Error inserting user", http.StatusInternalServerError)
-			return
+			comm = Communication{Message: "Error inserting user", Error: true}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(comm)
 		}
 
 		// Commit the transaction
 		if err := tx.Commit(); err != nil {
-			http.Error(w, "Error committing transaction", http.StatusInternalServerError)
-			return
+			comm = Communication{Message: "Error committing transaction", Error: true}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(comm)
 		}
 
-		response := map[string]string{"message": "User registered"}
+		comm = Communication{Message: "User registered", Error: false}
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(response)
+		json.NewEncoder(w).Encode(comm)
 
 	} else {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		comm = Communication{Message: "Invalid Request Method", Error: true}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(comm)
 	}
 }

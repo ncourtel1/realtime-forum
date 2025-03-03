@@ -9,3 +9,8 @@ type User struct {
 	Email     string `json:"Email"`
 	Password  string `json:"Password"`
 }
+
+type Communication struct {
+	Message string `json:"Message"`
+	Error   bool   `json:"Error"`
+}
