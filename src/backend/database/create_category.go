@@ -2,7 +2,7 @@ package db
 
 import "net/http"
 
-func Create_category(w http.ResponseWriter, r *http.Request) {
+func CreateCategory(w http.ResponseWriter, r *http.Request) {
 	// Code to create category
 	if r.Method == http.MethodPost {
 		id := r.FormValue("id")

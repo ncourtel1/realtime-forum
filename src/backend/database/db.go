@@ -35,7 +35,7 @@ func SetupDatabase() *sql.DB {
 	category TEXT NOT NULL,
 	user_id INTEGER NOT NULL,
 	FOREIGN KEY(user_id) REFERENCES users(id) 
-	FOREIGN KEY(category) REFERENCES categories(name)
+	FOREIGN KEY(category) REFERENCES categories(id    )
 	);`
 
 	createCommentsTable := `
@@ -52,8 +52,8 @@ func SetupDatabase() *sql.DB {
 
 	createCategoryTable := `
 	CREATE TABLE IF NOT EXISTS categories (
-	name TEXT NOT NULL UNIQUE PRIMARY KEY,
-	id INTEGER AUTOINCREMENT
+	id INTEGER AUTOINCREMENT PRIMARY KEY,
+	name TEXT NOT NULL UNIQUE 
 	);`
 
 	queries := []string{createUsersTable, createCategoryTable, createPostsTable, createCommentsTable}
@@ -63,10 +63,12 @@ func SetupDatabase() *sql.DB {
 		if err != nil {
 			log.Fatal(err)
 		}
-		_, err = statement.Exec(query)
+
+		_, err = statement.Exec()
 		if err != nil {
 			log.Fatal(err)
 		}
+		statement.Close()
 	}
 	return db
 }

@@ -1,6 +1,13 @@
 package db
 
-import "net/http"
+import (
+	"net/http"
+)
+
+type Communication struct {
+	Message string `json:"Message"`
+	Error   bool   `json:"Error"`
+}
 
 // CreateServer creates a new user in the database
 func CreateUser(w http.ResponseWriter, r *http.Request) {
