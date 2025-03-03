@@ -36,9 +36,7 @@ func CreateSession(w http.ResponseWriter, userID int, username, role string) {
 type Session struct {
 	UserID    int
 	Username  string
-	Role      string
 	CreatedAt time.Time
-	// We need to add the user role here...
 }
 
 var (
@@ -52,7 +50,6 @@ func StoreSession(sessionID string, userID int, username, role string) {
 	sessions[sessionID] = Session{
 		UserID:    userID,
 		Username:  username,
-		Role:      role,
 		CreatedAt: time.Now(),
 	}
 }

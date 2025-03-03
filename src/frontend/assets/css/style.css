@@ -75,9 +75,9 @@ c-posts section, c-posts header{
     padding: 0rem 2rem;
 }
 
-/* CONNECTION/REGISTER STYLE */
+/* CONNECTION/REGISTER/WRITE STYLE */
 
-c-connection div, c-register div {
+c-connection div, c-register div, c-write div {
     padding: var(--externalPadding);
     display: flex;
     gap: 2rem;
@@ -87,7 +87,7 @@ c-connection div, c-register div {
     height: 70dvh;
 }
 
-c-connection label, c-register label {
+c-connection label, c-register label, c-write label {
     display: flex;
     align-items: start;
     justify-content: start;
@@ -96,7 +96,7 @@ c-connection label, c-register label {
     width: 60dvw;
 }
 
-c-connection input, c-register input, select {
+c-connection input, c-register input, c-write input, select, textarea {
     width: 100%;
 }
 
@@ -199,12 +199,21 @@ select {
   border: none;
 }
 
+textarea {
+  border: none;
+  height: 30dvh;
+}
+
 button {
     border: none;
     background-color: var(--accent);
     color: var(--background);
     width: 100%;
     padding: 0.4rem 0;
+}
+
+hr {
+  width: 100%;
 }
 
 .spacer {

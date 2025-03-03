@@ -4,6 +4,7 @@ import "./posts.js";
 import "./connection.js";
 import "./register.js";
 import "./messages.js";
+import "./write.js";
 
 class App extends HTMLElement {
     constructor() {
@@ -18,6 +19,7 @@ class App extends HTMLElement {
         this.activePath === '/connection' ? document.title = "3615 - Connection" :
         this.activePath === '/register' ? document.title = "3615 - Register" :
         this.activePath === '/messages' ? document.title = "3615 - Messages" : '';
+        this.activePath === '/write' ? document.title = "3615 - Write" : '';
         this.innerHTML = `
             <c-title></c-title>
             <c-nav></c-nav>
@@ -25,6 +27,7 @@ class App extends HTMLElement {
             ${this.activePath === '/connection' ? '<c-connection></c-connection>' : ''}
             ${this.activePath === '/register' ? '<c-register></c-register>' : ''}
             ${this.activePath === '/messages' ? '<c-messages></c-messages>' : ''}
+            ${this.activePath === '/write' ? '<c-write></c-write>' : ''}
         `;
     }
 }
