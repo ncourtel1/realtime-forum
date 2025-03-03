@@ -1,17 +1,22 @@
 package db
 
-import "net/http"
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
 
 // CreateServer creates a new user in the database
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		username := r.FormValue("username")
-		password := r.FormValue("password")
-		email := r.FormValue("email")
-		age := r.FormValue("age")
-		gender := r.FormValue("gender")
-		firstName := r.FormValue("first_name")
-		lastName := r.FormValue("last_name")
+		var user User
+		if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+			http.Error(w, "Invalid data", http.StatusBadRequest)
+			fmt.Println(err)
+			return
+		}
+
+		fmt.Println(user)
 
 		db := SetupDatabase()
 		defer db.Close()
@@ -26,7 +31,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		// Insert user into the database
 		insertUser := `
 		INSERT INTO users (username, password, email, age, gender, first_name, last_name) VALUES (?, ?, ?, ?, ?, ?, ?)`
-		_, err = tx.Exec(insertUser, username, password, email, age, gender, firstName, lastName)
+		_, err = tx.Exec(insertUser, user.Username, user.Password, user.Email, user.Age, user.Gender, user.FirstName, user.LastName)
 		if err != nil {
 			tx.Rollback() // Rollback the transaction if there is an error
 			http.Error(w, "Error inserting user", http.StatusInternalServerError)
@@ -38,6 +43,12 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Error committing transaction", http.StatusInternalServerError)
 			return
 		}
+
+		response := map[string]string{"message": "User registered"}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(response)
+
 	} else {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 	}

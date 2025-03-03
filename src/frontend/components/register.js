@@ -1,13 +1,22 @@
 class Register extends HTMLElement {
     constructor() {
         super();
-        this.username = "";
-        this.age = "";
-        this.gender = "undefined";
-        this.firstName = "";
-        this.lastName = "";
-        this.email = "";
-        this.password = "";
+        this.user = {
+            Username : "",
+            Age : "",
+            Gender : "undefined",
+            FirstName : "",
+            LastName : "",
+            Email : "",
+            Password : ""
+        }
+        // this.username = "";
+        // this.age = "";
+        // this.gender = "undefined";
+        // this.firstName = "";
+        // this.lastName = "";
+        // this.email = "";
+        // this.password = "";
         this.monitor = { isLoading: false, error: null };
         this.placeHolder = "...................................................................................................";
         this.render();
@@ -16,42 +25,67 @@ class Register extends HTMLElement {
     connectedCallback() {
         let usernameInput = this.querySelector('#username');
         usernameInput.oninput = (e) => {
-            this.username = e.target.value;
+            this.user.Username = e.target.value;
         };
 
         let ageInput = this.querySelector('#age');
         ageInput.oninput = (e) => {
-            this.age = e.target.value;
+            this.user.Age = parseInt(e.target.value);
         };
 
         let genderInput = this.querySelector('#gender');
         genderInput.oninput = (e) => {
-            this.gender = e.target.value;
+            this.user.Gender = e.target.value;
         };
 
         let firstNameInput = this.querySelector('#firstName');
         firstNameInput.oninput = (e) => {
-            this.firstName = e.target.value;
+            this.user.FirstName = e.target.value;
         };
 
         let lastNameInput = this.querySelector('#lastName');
         lastNameInput.oninput = (e) => {
-            this.lastName = e.target.value;
+            this.user.LastName = e.target.value;
         };
 
         let emailInput = this.querySelector('#email');
         emailInput.oninput = (e) => {
-            this.email = e.target.value;
+            this.user.Email = e.target.value;
         };
 
         let passwordInput = this.querySelector('#password');
         passwordInput.oninput = (e) => {
-            this.password = e.target.value;
+            this.user.Password = e.target.value;
         };
 
         let button = this.querySelector('button');
         button.onclick = () => {
-            this.monitor.isLoading = true;
+            this.registerUser();
+        }
+    }
+
+    async registerUser() {
+        try {
+            this.monitor = {isLoading: true, error: null};
+            this.render();
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(this.user)
+            });
+    
+            if (!response.ok) {
+                this.monitor = {isLoading: false, error: `${response.status} ${response.statusText}`};
+                this.render();
+            }
+            const data = await response.json();
+            this.monitor = {isLoading: false, error: null};
+            this.render();
+            console.log('Utilisateur enregistré avec succès:', data);
+        } catch (error) {
+            this.monitor = {isLoading: false, error: error.message};
             this.render();
         }
     }

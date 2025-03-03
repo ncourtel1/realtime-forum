@@ -1,6 +1,7 @@
 package server
 
 import (
+	"db"
 	"fmt"
 	"time"
 )
@@ -11,7 +12,7 @@ func InitServer() {
 
 	// Add handlers for different routes
 	//server.Handle("/prout", IndexHandler) // Root route
-	// server.Handle("/about", handlers.AboutHandler) // About route
+	server.Handle("/register", db.CreateUser) // About route
 	// server.Handle("/create-user", db.CreateUser)
 	// server.Handle("/delete-user", db.DeleteUser)
 
