@@ -14,8 +14,7 @@ func CreateCategory(w http.ResponseWriter, r *http.Request) {
 		// Start a transaction
 		tx, err := db.Begin()
 		if err != nil {
-			http.Error(w, "Error starting transaction", http.StatusInternalServerError)
-			return
+			CommunicationMessage(w, "Error starting transaction", true)
 		}
 
 		// Insert category into the database
@@ -24,16 +23,14 @@ func CreateCategory(w http.ResponseWriter, r *http.Request) {
 		_, err = tx.Exec(insertCategory, id, name)
 		if err != nil {
 			tx.Rollback() // Rollback the transaction if there is an error
-			http.Error(w, "Error inserting category", http.StatusInternalServerError)
-			return
+			CommunicationMessage(w, "Error inserting category", true)
 		}
 
 		// Commit the transaction
 		if err := tx.Commit(); err != nil {
-			http.Error(w, "Error committing transaction", http.StatusInternalServerError)
-			return
+			CommunicationMessage(w, "Error committing transaction", true)
 		}
 	} else {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		CommunicationMessage(w, "Invalid Request Metod", true)
 	}
 }

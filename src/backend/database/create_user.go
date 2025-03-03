@@ -8,14 +8,11 @@ import (
 
 // CreateServer creates a new user in the database
 func CreateUser(w http.ResponseWriter, r *http.Request) {
-	var comm Communication
 
 	if r.Method == http.MethodPost {
 		var user User
 		if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-			comm = Communication{Message: "cant decode user", Error: true}
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(comm)
+			CommunicationMessage(w, "Cant decode user", true)
 		}
 
 		fmt.Println(user)
@@ -26,9 +23,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		// Start a transaction
 		tx, err := db.Begin()
 		if err != nil {
-			comm = Communication{Message: "Error starting transaction", Error: true}
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(comm)
+			CommunicationMessage(w, "Error starting transaction", true)
 		}
 
 		// Insert user into the database
@@ -37,25 +32,17 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		_, err = tx.Exec(insertUser, user.Username, user.Password, user.Email, user.Age, user.Gender, user.FirstName, user.LastName)
 		if err != nil {
 			tx.Rollback() // Rollback the transaction if there is an error
-			comm = Communication{Message: "Error inserting user", Error: true}
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(comm)
+			CommunicationMessage(w, "Error inserting user", true)
 		}
 
 		// Commit the transaction
 		if err := tx.Commit(); err != nil {
-			comm = Communication{Message: "Error committing transaction", Error: true}
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(comm)
+			CommunicationMessage(w, "Error committing transaction", true)
 		}
 
-		comm = Communication{Message: "User registered", Error: false}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(comm)
+		CommunicationMessage(w, "User registered", false)
 
 	} else {
-		comm = Communication{Message: "Invalid Request Method", Error: true}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(comm)
+		CommunicationMessage(w, "Invalid Request Metod", true)
 	}
 }

@@ -8,18 +8,13 @@ import (
 )
 
 func ReadUser(w http.ResponseWriter, r *http.Request) {
-	var comm Communication
 	if r.Method != http.MethodPost {
-		comm = Communication{Message: "Method not allowed", Error: true}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(comm)
+		CommunicationMessage(w, "Method not allowed", true)
 	}
 
 	var user User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		comm = Communication{Message: "cant decode user", Error: true}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(comm)
+		CommunicationMessage(w, "Cant fetch data", true)
 	}
 
 	database := SetupDatabase()
@@ -40,26 +35,18 @@ func ReadUser(w http.ResponseWriter, r *http.Request) {
 	err := database.QueryRow(query, param).Scan(&dbUser.Username, &dbUser.Email, &dbUser.Password)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			comm = Communication{Message: "Cant find user", Error: true}
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(comm)
+			CommunicationMessage(w, "Cant find user", true)
 		}
-		comm = Communication{Message: "Internal error", Error: true}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(comm)
+		CommunicationMessage(w, "Internal Error", true)
 	}
 
 	// Vérifier le mot de passe (pas encore hashé)
 	if user.Password != dbUser.Password {
-		comm = Communication{Message: "Incorrect Password", Error: true}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(comm)
+		CommunicationMessage(w, "Incorrect Password", true)
 	}
 
 	// Réponse en JSON
-	response := Communication{Message: "Connected", Error: false}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	CommunicationMessage(w, "Connected", false)
 
 }
 
