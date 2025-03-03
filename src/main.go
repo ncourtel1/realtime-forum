@@ -1,5 +1,9 @@
 package main
 
-func main() {
+import (
+	"server"
+)
 
+func main() {
+	server.InitServer()
 }
