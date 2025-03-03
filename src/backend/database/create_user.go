@@ -6,19 +6,13 @@ import (
 	"net/http"
 )
 
-type Communication struct {
-	Message string `json:"Message"`
-	Error   bool   `json:"Error"`
-}
-
 // CreateServer creates a new user in the database
 func CreateUser(w http.ResponseWriter, r *http.Request) {
+
 	if r.Method == http.MethodPost {
 		var user User
 		if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-			http.Error(w, "Invalid data", http.StatusBadRequest)
-			fmt.Println(err)
-			return
+			CommunicationMessage(w, "Cant decode user", true)
 		}
 
 		fmt.Println(user)
@@ -29,8 +23,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		// Start a transaction
 		tx, err := db.Begin()
 		if err != nil {
-			http.Error(w, "Error starting transaction", http.StatusInternalServerError)
-			return
+			CommunicationMessage(w, "Error starting transaction", true)
 		}
 
 		// Insert user into the database
@@ -39,22 +32,17 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		_, err = tx.Exec(insertUser, user.Username, user.Password, user.Email, user.Age, user.Gender, user.FirstName, user.LastName)
 		if err != nil {
 			tx.Rollback() // Rollback the transaction if there is an error
-			http.Error(w, "Error inserting user", http.StatusInternalServerError)
-			return
+			CommunicationMessage(w, "Error inserting user", true)
 		}
 
 		// Commit the transaction
 		if err := tx.Commit(); err != nil {
-			http.Error(w, "Error committing transaction", http.StatusInternalServerError)
-			return
+			CommunicationMessage(w, "Error committing transaction", true)
 		}
 
-		response := map[string]string{"message": "User registered"}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(response)
+		CommunicationMessage(w, "User registered", false)
 
 	} else {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		CommunicationMessage(w, "Invalid Request Metod", true)
 	}
 }

@@ -1,6 +1,8 @@
 package db
 
-import "net/http"
+import (
+	"net/http"
+)
 
 func DeletePost(w http.ResponseWriter, r *http.Request) {
 	// Code to delete post
@@ -13,8 +15,7 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 		// Start a transaction
 		tx, err := db.Begin()
 		if err != nil {
-			http.Error(w, "Error starting transaction", http.StatusInternalServerError)
-			return
+			CommunicationMessage(w, "Error Starting Transaction", true)
 		}
 
 		// Delete post from the database
@@ -23,16 +24,14 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 		_, err = tx.Exec(deletePost, id)
 		if err != nil {
 			tx.Rollback() // Rollback the transaction if there is an error
-			http.Error(w, "Error deleting post", http.StatusInternalServerError)
-			return
+			CommunicationMessage(w, "Error dweleting comment", true)
 		}
 
 		// Commit the transaction
 		if err := tx.Commit(); err != nil {
-			http.Error(w, "Error committing transaction", http.StatusInternalServerError)
-			return
+			CommunicationMessage(w, "Error committing transaction", true)
 		}
 	} else {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		CommunicationMessage(w, "Invalid request method", true)
 	}
 }

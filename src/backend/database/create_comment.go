@@ -18,8 +18,7 @@ func CreateComments(w http.ResponseWriter, r *http.Request) {
 		// Start a transaction
 		tx, err := db.Begin()
 		if err != nil {
-			http.Error(w, "Error starting transaction", http.StatusInternalServerError)
-			return
+			CommunicationMessage(w, "Error startting transaction", true)
 		}
 
 		// Insert comment into the database
@@ -28,16 +27,14 @@ func CreateComments(w http.ResponseWriter, r *http.Request) {
 		_, err = tx.Exec(insertComment, id, title, content, created_at, postID, userID)
 		if err != nil {
 			tx.Rollback() // Rollback the transaction if there is an error
-			http.Error(w, "Error inserting comment", http.StatusInternalServerError)
-			return
+			CommunicationMessage(w, "Error inserting comment", true)
 		}
 
 		// Commit the transaction
 		if err := tx.Commit(); err != nil {
-			http.Error(w, "Error committing transaction", http.StatusInternalServerError)
-			return
+			CommunicationMessage(w, "Error committing transaction", true)
 		}
 	} else {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		CommunicationMessage(w, "Invalid Request Metod", true)
 	}
 }
