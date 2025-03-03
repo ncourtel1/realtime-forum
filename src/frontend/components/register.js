@@ -83,7 +83,10 @@ class Register extends HTMLElement {
             const data = await response.json();
             this.monitor = {isLoading: false, error: null};
             this.render();
-            console.log('Utilisateur enregistré avec succès:', data);
+            console.log(data);
+            const app = document.querySelector("c-app");
+            app.activePath = "/";
+            app.render();
         } catch (error) {
             this.monitor = {isLoading: false, error: error.message};
             this.render();
