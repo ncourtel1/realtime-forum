@@ -1,6 +1,7 @@
 package db
 
 type User struct {
+	ID        int    `json:"ID"`
 	Username  string `json:"Username"`
 	Age       int    `json:"Age"`
 	Gender    string `json:"Gender"`

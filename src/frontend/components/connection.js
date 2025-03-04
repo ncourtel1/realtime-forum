@@ -1,8 +1,7 @@
 class Connection extends HTMLElement {
     constructor() {
         super();
-        this.username = "";
-        this.password = "";
+        this.User = {Username: "", Password: ""}
         this.monitor = { isLoading: false, error: null };
         this.placeHolder = "...................................................................................................";
         this.render();
@@ -11,18 +10,46 @@ class Connection extends HTMLElement {
     connectedCallback() {
         let usernameInput = this.querySelector('#username');
         usernameInput.oninput = (e) => {
-            this.username = e.target.value;
+            this.User.Username = e.target.value;
         };
 
         let passwordInput = this.querySelector('#password');
         passwordInput.oninput = (e) => {
-            this.password = e.target.value;
+            this.User.Password = e.target.value;
         };
 
         let button = this.querySelector('button');
         button.onclick = () => {
-            this.monitor.isLoading = true;
+            this.getUser();
+        }
+    }
+
+    async getUser() {
+        try {
+            this.monitor = {isLoading: true, error: null};
             this.render();
+            const response = await fetch('/get_user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(this.User)
+            });
+            const data = await response.json();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            if (data.Error) {
+                throw new Error(data.Message);
+            }
+            this.categories = data;
+            this.monitor = {isLoading: false, error: null};
+            this.render();
+            const app = document.querySelector("c-app");
+            app.activePath = "/";
+            app.render();
+        } catch (error) {
+            this.monitor = {isLoading: false, error: error};
+            this.render();
+            this.connectedCallback();
         }
     }
 
@@ -41,7 +68,7 @@ class Connection extends HTMLElement {
                 <label>
                     <button>Connection</button>
                 </label>
-                ${this.monitor.error ? 'Error: ' + this.monitor.error : ''}
+                ${this.monitor.error ? this.monitor.error : ''}
                 <div class="y_spacer"></div>
             </div>
             ${this.monitor.isLoading ? '<div class="loader">Connection to the World Wide Web</div>' : ''}

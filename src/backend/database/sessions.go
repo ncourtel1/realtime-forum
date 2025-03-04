@@ -1,6 +1,7 @@
-package server
+package db
 
 import (
+	"encoding/json"
 	"net/http"
 	"sync"
 	"time"
@@ -12,7 +13,7 @@ func GenerateSessionID() string {
 	return uuid.New().String()
 }
 
-func CreateSession(w http.ResponseWriter, userID int, username, role string) {
+func CreateSession(w http.ResponseWriter, userID int, username string) {
 	oldSessionID, exists := SessionExists(userID)
 	if exists {
 		DeleteSession(oldSessionID)
@@ -30,7 +31,7 @@ func CreateSession(w http.ResponseWriter, userID int, username, role string) {
 	})
 
 	// Store session in server (implement this function)
-	StoreSession(sessionID, userID, username, role)
+	StoreSession(sessionID, userID, username)
 }
 
 type Session struct {
@@ -44,7 +45,7 @@ var (
 	mutex    sync.RWMutex
 )
 
-func StoreSession(sessionID string, userID int, username, role string) {
+func StoreSession(sessionID string, userID int, username string) {
 	mutex.Lock()
 	defer mutex.Unlock()
 	sessions[sessionID] = Session{
@@ -92,4 +93,28 @@ func GetCookie(w http.ResponseWriter, r *http.Request) Session {
 		return Session{}
 	}
 	return session
+}
+
+func CheckSessionHandler(w http.ResponseWriter, r *http.Request) {
+	session := GetCookie(w, r)
+
+	if session.UserID == 0 {
+		CommunicationMessage(w, "Unauthorized", true)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"userID":   session.UserID,
+		"username": session.Username,
+	})
+}
+
+func DeleteSessionHandler(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		return
+	}
+	sessionID := cookie.Value
+	DeleteSession(sessionID)
+	CommunicationMessage(w, "Logged out", false)
 }

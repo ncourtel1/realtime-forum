@@ -10,13 +10,6 @@ class Register extends HTMLElement {
             Email : "",
             Password : ""
         }
-        // this.username = "";
-        // this.age = "";
-        // this.gender = "undefined";
-        // this.firstName = "";
-        // this.lastName = "";
-        // this.email = "";
-        // this.password = "";
         this.monitor = { isLoading: false, error: null };
         this.placeHolder = "...................................................................................................";
         this.render();
@@ -82,9 +75,11 @@ class Register extends HTMLElement {
             }
             const data = await response.json();
             await new Promise(resolve => setTimeout(resolve, 500));
+            if (data.Error) {
+                throw new Error(data.Message);
+            }
             this.monitor = {isLoading: false, error: null};
             this.render();
-            console.log(data);
             const app = document.querySelector("c-app");
             app.activePath = "/";
             app.render();

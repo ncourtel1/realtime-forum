@@ -1,20 +1,35 @@
+import { Connected, setConnected } from "../main.js";
+
 class Nav extends HTMLElement {
     constructor() {
         super();
-        this.connected = document.querySelector('c-app').connected;
+        //this.connected = document.querySelector('c-app').connected;
         this.activePath = document.querySelector('c-app').activePath;
         this.render();
     }
 
     connectedCallback() {
-        if (this.connected) {
+        if (Connected) {
             let quit = this.querySelector('#quit');
             quit.onclick = () => {
-                const app = document.querySelector("c-app");
-                app.connected = false
-                app.activePath = "/";
-                app.render();
+                this.deleteSession();
             }
+        }
+    }
+
+    async deleteSession() {
+        try {
+            const response = await fetch("/delete_session");
+            const data = await response.json();
+            if (data.Error) {
+                throw new Error(data.Message);
+            }
+            setConnected(false);
+            const app = document.querySelector("c-app");
+            app.activePath = "/"
+            app.render();
+        } catch (error) {
+            console.error("Error deleting session:", error);
         }
     }
 
@@ -22,7 +37,7 @@ class Nav extends HTMLElement {
         this.innerHTML = `
             <div>
                 <a href="/" ${this.activePath === "/" ? `class="highlight"` : ""} data-link>H)ome</a>
-                ${!this.connected ?
+                ${!Connected ?
                     `<a href="/connection" ${this.activePath === "/connection" ? `class="highlight"` : ""} data-link>C)onnection</a>
                     <a href="/register" ${this.activePath === "/register" ? `class="highlight"` : ""} data-link>R)egister</a>`
                     :
@@ -32,6 +47,7 @@ class Nav extends HTMLElement {
                 }
             </div>
         `;
+        this.connectedCallback();
     }
 }
 

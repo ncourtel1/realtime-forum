@@ -15,6 +15,9 @@ func InitServer() {
 	server.Handle("/register", db.CreateUser)
 	server.Handle("/create_category", db.CreateCategory)
 	server.Handle("/get_categories", db.ReadCategories)
+	server.Handle("/get_user", db.ReadUser)
+	server.Handle("/get_session", db.CheckSessionHandler)
+	server.Handle("/delete_session", db.DeleteSessionHandler)
 	// server.Handle("/create-user", db.CreateUser)
 	// server.Handle("/delete-user", db.DeleteUser)
 
