@@ -16,6 +16,7 @@ type Comment struct {
 func ReadComment(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		CommunicationMessage(w, "Method not allowed", true)
+		return
 	}
 
 	database := SetupDatabase()
@@ -24,6 +25,7 @@ func ReadComment(w http.ResponseWriter, r *http.Request) {
 	rows, err := database.Query("SELECT id, content, created_at, post_id, user_id FROM comments ORDER BY createsd_at DESC")
 	if err != nil {
 		CommunicationMessage(w, "Cant fetch data", true)
+		return
 	}
 	defer rows.Close()
 

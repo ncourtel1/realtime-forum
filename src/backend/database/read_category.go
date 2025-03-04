@@ -13,6 +13,7 @@ type Category struct {
 func ReadCategories(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		CommunicationMessage(w, "Method not allowed", true)
+		return
 	}
 
 	database := SetupDatabase()
@@ -21,6 +22,7 @@ func ReadCategories(w http.ResponseWriter, r *http.Request) {
 	rows, err := database.Query("SELECT name FROM categories ORDER BY name DESC")
 	if err != nil {
 		CommunicationMessage(w, "Cant fetch data", true)
+		return
 	}
 	defer rows.Close()
 
@@ -30,6 +32,7 @@ func ReadCategories(w http.ResponseWriter, r *http.Request) {
 		err := rows.Scan(&category.Name)
 		if err != nil {
 			CommunicationMessage(w, "Cant Scan data", true)
+			return
 		}
 		categories = append(categories, category)
 	}

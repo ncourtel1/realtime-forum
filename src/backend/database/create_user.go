@@ -2,7 +2,6 @@ package db
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -11,8 +10,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		var user User
 		if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-			http.Error(w, "Invalid data", http.StatusBadRequest)
-			fmt.Println(err)
+			CommunicationMessage(w, "Cant decode user", true)
 			return
 		}
 
@@ -22,7 +20,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		// Start a transaction
 		tx, err := db.Begin()
 		if err != nil {
-			http.Error(w, "Error starting transaction", http.StatusInternalServerError)
+			CommunicationMessage(w, "Error starting transaction", true)
 			return
 		}
 
@@ -32,13 +30,13 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		_, err = tx.Exec(insertUser, user.Username, user.Password, user.Email, user.Age, user.Gender, user.FirstName, user.LastName)
 		if err != nil {
 			tx.Rollback() // Rollback the transaction if there is an error
-			http.Error(w, "Error inserting user", http.StatusInternalServerError)
+			CommunicationMessage(w, "Error inserting user", true)
 			return
 		}
 
 		// Commit the transaction
 		if err := tx.Commit(); err != nil {
-			http.Error(w, "Error committing transaction", http.StatusInternalServerError)
+			CommunicationMessage(w, "Error committing transaction", true)
 			return
 		}
 
@@ -48,6 +46,6 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 
 	} else {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		CommunicationMessage(w, "Invalid Request Method", true)
 	}
 }

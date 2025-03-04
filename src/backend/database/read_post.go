@@ -19,6 +19,7 @@ type Post struct {
 func ReadPost(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		CommunicationMessage(w, "Method not allowed", true)
+		return
 	}
 
 	database := SetupDatabase()
@@ -28,6 +29,7 @@ func ReadPost(w http.ResponseWriter, r *http.Request) {
 	rows, err := database.Query("SELECT id, title, content, created_at, category, user_id FROM posts ORDER BY created_at DESC")
 	if err != nil {
 		CommunicationMessage(w, "Cant fetch data", true)
+		return
 	}
 	defer rows.Close()
 
@@ -38,6 +40,7 @@ func ReadPost(w http.ResponseWriter, r *http.Request) {
 		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt, &post.Category, &post.UserID)
 		if err != nil {
 			CommunicationMessage(w, "Cant Scan data", true)
+			return
 		}
 		posts = append(posts, post)
 	}

@@ -10,11 +10,13 @@ import (
 func ReadUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		CommunicationMessage(w, "Method not allowed", true)
+		return
 	}
 
 	var user User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		CommunicationMessage(w, "Cant fetch data", true)
+		return
 	}
 
 	database := SetupDatabase()
@@ -36,13 +38,16 @@ func ReadUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			CommunicationMessage(w, "Cant find user", true)
+			return
 		}
 		CommunicationMessage(w, "Internal Error", true)
+		return
 	}
 
 	// Vérifier le mot de passe (pas encore hashé)
 	if user.Password != dbUser.Password {
 		CommunicationMessage(w, "Incorrect Password", true)
+		return
 	}
 
 	// Réponse en JSON
