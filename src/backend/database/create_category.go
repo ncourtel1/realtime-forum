@@ -10,7 +10,7 @@ func CreateCategory(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		var category Category
 		if err := json.NewDecoder(r.Body).Decode(&category); err != nil {
-			http.Error(w, "Invalid data", http.StatusBadRequest)
+			CommunicationMessage(w, "Invalid Data", true)
 			return
 		}
 
@@ -39,9 +39,7 @@ func CreateCategory(w http.ResponseWriter, r *http.Request) {
 			CommunicationMessage(w, "Error committing transaction", true)
 			return
 		}
-
-		CommunicationMessage(w, "Category Created Successfully", false)
-
+		CommunicationMessage(w, "Category successfully created", false)
 	} else {
 		CommunicationMessage(w, "Invalid Request Method", true)
 	}

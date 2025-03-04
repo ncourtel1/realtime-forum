@@ -40,11 +40,11 @@ class Write extends HTMLElement {
                 },
                 body: JSON.stringify(this.newCategory)
             });
-            if (!response.ok) {
-                this.monitor = {isLoading: false, error: `${response.status} ${response.statusText}`};
-                this.render();
-            }
+            const data = await response.json();
             await new Promise(resolve => setTimeout(resolve, 500));
+            if (data.Error) {
+                throw new Error(data.Message);
+            }
             this.isCategoryExpanded = !this.isCategoryExpanded;
             this.getCategories();
         } catch (error) {
@@ -58,18 +58,17 @@ class Write extends HTMLElement {
             this.monitor = {isLoading: true, error: null};
             this.render();
             const response = await fetch('/get_categories');
-            if (!response.ok) {
-                this.monitor = {isLoading: false, error: `${response.status} ${response.statusText}`};
-                this.render();
-            }
             const data = await response.json();
             await new Promise(resolve => setTimeout(resolve, 500));
+            if (data.Error) {
+                throw new Error(data.Message);
+            }
             this.categories = data;
             this.monitor = {isLoading: false, error: null};
             this.render();
             this.connectedCallback();
         } catch (error) {
-            this.monitor = {isLoading: false, error: error.message};
+            this.monitor = {isLoading: false, error: error};
             this.render();
         }
     }
