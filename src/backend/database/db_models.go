@@ -14,3 +14,11 @@ type Communication struct {
 	Message string `json:"Message"`
 	Error   bool   `json:"Error"`
 }
+
+type Message struct {
+	ID             int    `json:"id"`
+	ConversationID int    `json:"conversation_id"`
+	SenderID       int    `json:"sender_id"`
+	Content        string `json:"content"`
+	SentAt         string `json:"sent_at"`
+}
