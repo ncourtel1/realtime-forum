@@ -1,15 +1,24 @@
 package db
 
-import "net/http"
+import (
+	"encoding/json"
+	"net/http"
+	"time"
+)
 
 func CreatePosts(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		id := r.FormValue("id")
-		title := r.FormValue("title")
-		content := r.FormValue("content")
-		created_at := r.FormValue("created_at")
-		category := r.FormValue("category")
-		userID := r.FormValue("user_id")
+		session := GetCookie(w, r)
+		if session.UserID == 0 {
+			CommunicationMessage(w, "No session found", true)
+			return
+		}
+
+		var post Post
+		if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
+			CommunicationMessage(w, "Invalid Data", true)
+			return
+		}
 
 		db := SetupDatabase()
 		defer db.Close()
@@ -23,8 +32,8 @@ func CreatePosts(w http.ResponseWriter, r *http.Request) {
 
 		// Insert post into the database
 		insertPost := `
-		INSERT INTO posts (id, title, content, created_at, category, user_id) VALUES (?, ?, ?, ?, ?, ?)`
-		_, err = tx.Exec(insertPost, id, title, content, created_at, category, userID)
+		INSERT INTO posts (title, content, created_at, category, user_id) VALUES (?, ?, ?, ?, ?)`
+		_, err = tx.Exec(insertPost, post.Title, post.Content, time.Now(), post.Category, session.UserID)
 		if err != nil {
 			tx.Rollback() // Rollback the transaction if there is an error
 			CommunicationMessage(w, "Error inserting post", true)

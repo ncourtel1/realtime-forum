@@ -3,16 +3,17 @@ package db
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 )
 
 // Structure pour un post
 type Post struct {
-	ID        int    `json:"id"`
-	Title     string `json:"title"`
-	Content   string `json:"content"`
-	CreatedAt string `json:"created_at"`
-	Category  string `json:"category"`
-	UserID    int    `json:"user_id"`
+	ID        int       `json:"Id"`
+	Title     string    `json:"Title"`
+	Content   string    `json:"Content"`
+	CreatedAt time.Time `json:"Created_at"`
+	Category  int       `json:"Category"`
+	UserID    int       `json:"User_id"`
 }
 
 // Lire tous les posts

@@ -19,7 +19,7 @@ func ReadCategories(w http.ResponseWriter, r *http.Request) {
 	database := SetupDatabase()
 	defer database.Close()
 
-	rows, err := database.Query("SELECT name FROM categories ORDER BY name DESC")
+	rows, err := database.Query("SELECT id, name FROM categories ORDER BY name DESC")
 	if err != nil {
 		CommunicationMessage(w, "Cant fetch data", true)
 		return
@@ -29,7 +29,7 @@ func ReadCategories(w http.ResponseWriter, r *http.Request) {
 	var categories []Category
 	for rows.Next() {
 		var category Category
-		err := rows.Scan(&category.Name)
+		err := rows.Scan(&category.ID, &category.Name)
 		if err != nil {
 			CommunicationMessage(w, "Cant Scan data", true)
 			return

@@ -2,6 +2,7 @@ class Write extends HTMLElement {
     constructor() {
         super();
         this.categories = [];
+        this.Post = {Title: "", Content: "", Category: 0};
         this.newCategory = {name: ""};
         this.isCategoryExpanded = false;
         this.monitor = { isLoading: false, error: null };
@@ -27,6 +28,27 @@ class Write extends HTMLElement {
                 this.createCategory();
             }
         }
+
+        let title = this.querySelector('#title');
+        title.oninput = (e) => {
+            this.Post.Title = e.target.value;
+            console.log(this.Post);
+        };
+
+        let content = this.querySelector('#post');
+        content.oninput = (e) => {
+            this.Post.Content = e.target.value;
+        };
+
+        let category = this.querySelector('#category');
+        category.onchange = (e) => {
+            this.Post.Category = parseInt(e.target.value);
+        };
+
+        let send = this.querySelector('#send');
+        send.onclick = () => {
+            this.createPost();
+        }
     }
 
     async createCategory() {
@@ -47,6 +69,30 @@ class Write extends HTMLElement {
             }
             this.isCategoryExpanded = !this.isCategoryExpanded;
             this.getCategories();
+        } catch (error) {
+            this.monitor = {isLoading: false, error: error};
+            this.render();
+        }
+    }
+
+    async createPost() {
+        try {
+            this.monitor = {isLoading: true, error: null};
+            this.render();
+            const response = await fetch('/create_post', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(this.Post)
+            });
+            const data = await response.json();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            if (data.Error) {
+                throw new Error(data.Message);
+            }
+            this.monitor = {isLoading: false, error: null};
+            this.render();
         } catch (error) {
             this.monitor = {isLoading: false, error: error};
             this.render();
@@ -84,7 +130,7 @@ class Write extends HTMLElement {
                 <label>
                     Category:
                     <select id="category">
-                    ${this.categories.map(category => `<option value="${category.name}">${category.name}</option>`).join('')}
+                    ${this.categories.map(category => `<option value="${category.id}">${category.name}</option>`).join('')}
                     </select>
                 </label>
                 <label>
@@ -105,7 +151,7 @@ class Write extends HTMLElement {
                     <textarea id="post" placeholder="${this.placeHolder}"></textarea>
                 </label>
                 <label>
-                    <button>Send to the World Wide Web</button>
+                    <button id="send">Send to the World Wide Web</button>
                 </label>
                 ${this.monitor.error ? 'Error: ' + this.monitor.error : ''}
                 <div class="y_spacer"></div>
