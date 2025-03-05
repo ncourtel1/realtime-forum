@@ -11,7 +11,6 @@ func InitServer() {
 	server := NewServer(":8080", 10*time.Second, 10*time.Second, 30*time.Second, 2*time.Second, 1<<20) // 1 MB max header size
 
 	// Add handlers for different routes
-	//server.Handle("/prout", IndexHandler) // Root route
 	server.Handle("/register", db.CreateUser)
 	server.Handle("/create_category", db.CreateCategory)
 	server.Handle("/get_categories", db.ReadCategories)
@@ -20,8 +19,8 @@ func InitServer() {
 	server.Handle("/delete_session", db.DeleteSessionHandler)
 	server.Handle("/create_post", db.CreatePosts)
 	server.Handle("/get_posts", db.ReadPost)
-	// server.Handle("/create-user", db.CreateUser)
-	// server.Handle("/delete-user", db.DeleteUser)
+	server.Handle("/create_comment", db.CreateComments)
+	server.Handle("/get_comments", db.ReadComment)
 
 	// // Add middlewares
 	// server.Use(middlewares.LoggingMiddleware)

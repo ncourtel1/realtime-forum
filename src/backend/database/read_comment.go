@@ -6,11 +6,12 @@ import (
 )
 
 type Comment struct {
-	ID        int    `json:"id"`
-	Content   string `json:"content"`
-	CreatedAt string `json:"created_at"`
-	PostID    int    `json:"post_id"`
-	UserID    int    `json:"user_id"`
+	ID        int    `json:"Id"`
+	Content   string `json:"Content"`
+	CreatedAt string `json:"Created_at"`
+	PostID    int    `json:"Post_id"`
+	UserID    int    `json:"User_id"`
+	Username  string `json:"Username"`
 }
 
 func ReadComment(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +23,14 @@ func ReadComment(w http.ResponseWriter, r *http.Request) {
 	database := SetupDatabase()
 	defer database.Close()
 
-	rows, err := database.Query("SELECT id, content, created_at, post_id, user_id FROM comments ORDER BY createsd_at DESC")
+	query := `
+		SELECT c.content, c.created_at, c.post_id, c.user_id, u.username
+		FROM comments c
+		JOIN users u ON c.user_id = u.id
+		ORDER BY c.created_at DESC
+	`
+
+	rows, err := database.Query(query)
 	if err != nil {
 		CommunicationMessage(w, "Cant fetch data", true)
 		return
@@ -32,7 +40,7 @@ func ReadComment(w http.ResponseWriter, r *http.Request) {
 	var comments []Comment
 	for rows.Next() {
 		var comment Comment
-		err := rows.Scan(&comment.ID, &comment.Content, &comment.CreatedAt, &comment.PostID, &comment.UserID)
+		err := rows.Scan(&comment.Content, &comment.CreatedAt, &comment.PostID, &comment.UserID, &comment.Username)
 		if err != nil {
 			CommunicationMessage(w, "Cant Scan data", true)
 		}
@@ -40,7 +48,7 @@ func ReadComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(comments) == 0 {
-		w.WriteHeader(http.StatusNoContent)
+		CommunicationMessage(w, "No content", true)
 		return
 	}
 

@@ -1,16 +1,25 @@
 package db
 
-import "net/http"
+import (
+	"encoding/json"
+	"net/http"
+	"time"
+)
 
 func CreateComments(w http.ResponseWriter, r *http.Request) {
 	// Code to create comments
 	if r.Method == http.MethodPost {
-		id := r.FormValue("id")
-		title := r.FormValue("title")
-		content := r.FormValue("content")
-		created_at := r.FormValue("created_at")
-		postID := r.FormValue("post_id")
-		userID := r.FormValue("user_id")
+		session := GetCookie(w, r)
+		if session.UserID == 0 {
+			CommunicationMessage(w, "No session found", true)
+			return
+		}
+
+		var comment Comment
+		if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
+			CommunicationMessage(w, "Invalid Data", true)
+			return
+		}
 
 		db := SetupDatabase()
 		defer db.Close()
@@ -24,8 +33,8 @@ func CreateComments(w http.ResponseWriter, r *http.Request) {
 
 		// Insert comment into the database
 		insertComment := `
-		INSERT INTO comments (id, title, content, created_at, post_id, user_id) VALUES (?, ?, ?, ?, ?, ?)`
-		_, err = tx.Exec(insertComment, id, title, content, created_at, postID, userID)
+		INSERT INTO comments (content, created_at, post_id, user_id) VALUES (?, ?, ?, ?)`
+		_, err = tx.Exec(insertComment, comment.Content, time.Now(), comment.PostID, session.UserID)
 		if err != nil {
 			tx.Rollback() // Rollback the transaction if there is an error
 			CommunicationMessage(w, "Error inserting comment", true)

@@ -2,7 +2,7 @@ class Write extends HTMLElement {
     constructor() {
         super();
         this.categories = [];
-        this.Post = {Title: "", Content: "", Category: 0};
+        this.Post = {Title: "", Content: "", Category: 1};
         this.newCategory = {name: ""};
         this.isCategoryExpanded = false;
         this.monitor = { isLoading: false, error: null };
@@ -32,7 +32,6 @@ class Write extends HTMLElement {
         let title = this.querySelector('#title');
         title.oninput = (e) => {
             this.Post.Title = e.target.value;
-            console.log(this.Post);
         };
 
         let content = this.querySelector('#post');
@@ -119,6 +118,7 @@ class Write extends HTMLElement {
         } catch (error) {
             this.monitor = {isLoading: false, error: error};
             this.render();
+            this.connectedCallback();
         }
     }
 

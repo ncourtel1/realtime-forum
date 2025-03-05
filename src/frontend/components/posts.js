@@ -2,9 +2,40 @@ class Posts extends HTMLElement {
     constructor() {
         super();
         this.monitor = { isLoading: false, error: null };
-        this.Posts = []
+        this.Posts = [];
+        this.Comments = [];
+        this.Comment = {Content: "", Post_id: 0};
+        this.areCommentsExpanded = new Set();
+        this.placeHolder = "............................................................................................................................................................................................................................................................................................................................................................................................................";
         this.getPosts();
-        this.render();
+        this.getComments();
+    }
+
+    connectedCallback() {
+        this.querySelectorAll(".comments-toggle").forEach(button => {
+            button.onclick = () => {
+                let postID = button.dataset.postId;
+                if (this.areCommentsExpanded.has(postID)) {
+                    this.areCommentsExpanded.delete(postID);
+                } else {
+                    this.areCommentsExpanded.add(postID);
+                }
+                this.render();
+            };
+        });
+
+        this.querySelectorAll(".comment-input").forEach(input => {
+            input.oninput = (e) => {
+                this.Comment.Content = e.target.value;
+                this.Comment.Post_id = parseInt(e.target.dataset.postId);
+            };
+        });
+
+        this.querySelectorAll(".comment-send").forEach(button => {
+            button.onclick = () => {
+                this.submitComment();
+            }
+        });
     }
 
     async getPosts() {
@@ -27,8 +58,57 @@ class Posts extends HTMLElement {
         }
     }
 
+    async getComments() {
+        try {
+            this.monitor = {isLoading: true, error: null};
+            this.render();
+            const response = await fetch('/get_comments');
+            const data = await response.json();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            if (data.Error) {
+                throw new Error(data.Message);
+            }
+            console.log(data);
+            this.Comments = data;
+            this.monitor = {isLoading: false, error: null};
+            this.render();
+            //this.connectedCallback();
+        } catch (error) {
+            this.monitor = {isLoading: false, error: error};
+            this.render();
+        }
+    }
+
+    async submitComment() {
+        try {
+            this.monitor = {isLoading: true, error: null};
+            this.render();
+            const response = await fetch('/create_comment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(this.Comment)
+            });
+    
+            const data = await response.json();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            if (data.Error) {
+                throw new Error(data.Message);
+            }
+            this.monitor = {isLoading: false, error: null};
+            this.getPosts();
+            this.getComments();
+            this.render();
+        } catch (error) {
+            this.monitor = {isLoading: false, error: error.message};
+            this.render();
+        }
+    }
+
     render() {
-        this.innerHTML = this.Posts.map(post => `
+        this.innerHTML = `${this.monitor.error ? this.monitor.error : ''}${this.monitor.isLoading ? '<div class="loader">Connection to the World Wide Web</div>' : ''}`
+        this.innerHTML += this.Posts.map(post => `
             <article>
                 <h1>${post.Title}</h1>
                 <header>
@@ -38,40 +118,30 @@ class Posts extends HTMLElement {
                     ${post.Content}
                 </section>
                 <footer>
-                    <span class="highlight">See Comments</span>
+                    <span class="highlight comments-toggle" data-post-id="${post.Id}">${this.areCommentsExpanded.has(post.Id.toString()) ? 'Hide' : 'See'} Comments</span>
                 </footer>
+                ${this.areCommentsExpanded.has(post.Id.toString()) ?
+                    `<label>
+                        New Comment:
+                        <input type="text" class="comment-input" data-post-id="${post.Id}" placeholder="${this.placeHolder}" value="${this.Comment.Post_id == post.Id ? this.Comment.Content : ''}" />
+                        <button class="comment-send">Send</button>
+                    </label>
+                    ${this.Comments.filter(c => c.Post_id === post.Id).map(comment => {
+                        return `<article>
+                            <header>
+                                ${comment.Username}
+                            </header>
+                            <section>
+                                ${comment.Content}
+                            </section>
+                        </article>`;
+                    }).join('')}` :
+                    ``}
             </article>
             <div></div>
         `).join('');
-        this.innerHTML += `${this.monitor.error ? 'Error: ' + this.monitor.error : ''}${this.monitor.isLoading ? '<div class="loader">Connection to the World Wide Web</div>' : ''}`
+        this.connectedCallback();
     }
 }
-
-const posts = [
-    {
-        title: "Lorem ipsum",
-        author: "John Doe",
-        category: "Cheese",
-        body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris scelerisque arcu porta facilisis volutpat. Cras vel mauris molestie libero dignissim vehicula. Fusce vitae commodo nisi, bibendum iaculis tortor. Nunc consequat egestas laoreet. Nullam ornare justo id est porta tincidunt. Vivamus arcu sapien, faucibus in hendrerit porttitor, gravida sit amet nisi. Ut rutrum elit eu sem pretium, a posuere sapien euismod. Donec finibus ornare augue, eget pretium mi consectetur vel. Nulla facilisi. Nunc laoreet dolor purus, in malesuada libero tempor vel. Morbi convallis et nisi eget pellentesque. Fusce diam libero, fringilla at eros laoreet, semper laoreet quam. Vivamus ornare ex at diam mollis consequat. Nam sodales rhoncus neque, non malesuada turpis tempus a.",
-    },
-    {
-        title: "Pellentesque",
-        author: "Jean Bono",
-        category: "Empire",
-        body: "Pellentesque non odio scelerisque, vestibulum libero vel, tempor ipsum. Cras ultrices metus sed sapien maximus ullamcorper aliquet vitae ligula. Vestibulum non orci scelerisque neque aliquet faucibus in id elit. Vestibulum orci ligula, vulputate ut posuere tincidunt, commodo sit amet nunc. Etiam quis mi eu libero vestibulum rhoncus sed sit amet metus. Vestibulum nec diam ut magna tincidunt dignissim quis quis quam. Vestibulum at tellus porttitor, blandit ante nec, commodo lorem. Mauris ac consequat orci, a finibus justo. Pellentesque et felis sit amet augue tincidunt accumsan id a libero. Nunc tincidunt mollis tincidunt. In congue elit est, pretium egestas magna accumsan sit amet. Nulla malesuada viverra mi, quis ultricies ligula.",
-    },
-    {
-        title: "Lorem ipsum",
-        author: "John Doe",
-        category: "Cheese",
-        body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris scelerisque arcu porta facilisis volutpat. Cras vel mauris molestie libero dignissim vehicula. Fusce vitae commodo nisi, bibendum iaculis tortor. Nunc consequat egestas laoreet. Nullam ornare justo id est porta tincidunt. Vivamus arcu sapien, faucibus in hendrerit porttitor, gravida sit amet nisi. Ut rutrum elit eu sem pretium, a posuere sapien euismod. Donec finibus ornare augue, eget pretium mi consectetur vel. Nulla facilisi. Nunc laoreet dolor purus, in malesuada libero tempor vel. Morbi convallis et nisi eget pellentesque. Fusce diam libero, fringilla at eros laoreet, semper laoreet quam. Vivamus ornare ex at diam mollis consequat. Nam sodales rhoncus neque, non malesuada turpis tempus a.",
-    },
-    {
-        title: "Pellentesque",
-        author: "Jean Bono",
-        category: "Empire",
-        body: "Pellentesque non odio scelerisque, vestibulum libero vel, tempor ipsum. Cras ultrices metus sed sapien maximus ullamcorper aliquet vitae ligula. Vestibulum non orci scelerisque neque aliquet faucibus in id elit. Vestibulum orci ligula, vulputate ut posuere tincidunt, commodo sit amet nunc. Etiam quis mi eu libero vestibulum rhoncus sed sit amet metus. Vestibulum nec diam ut magna tincidunt dignissim quis quis quam. Vestibulum at tellus porttitor, blandit ante nec, commodo lorem. Mauris ac consequat orci, a finibus justo. Pellentesque et felis sit amet augue tincidunt accumsan id a libero. Nunc tincidunt mollis tincidunt. In congue elit est, pretium egestas magna accumsan sit amet. Nulla malesuada viverra mi, quis ultricies ligula.",
-    },
-];
 
 customElements.define("c-posts", Posts);
