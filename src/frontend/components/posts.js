@@ -68,7 +68,6 @@ class Posts extends HTMLElement {
             if (data.Error) {
                 throw new Error(data.Message);
             }
-            console.log(data);
             this.Comments = data;
             this.monitor = {isLoading: false, error: null};
             this.render();

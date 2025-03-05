@@ -21,6 +21,7 @@ func InitServer() {
 	server.Handle("/get_posts", db.ReadPost)
 	server.Handle("/create_comment", db.CreateComments)
 	server.Handle("/get_comments", db.ReadComment)
+	server.Handle("/ws", ServeWs)
 
 	// // Add middlewares
 	// server.Use(middlewares.LoggingMiddleware)
