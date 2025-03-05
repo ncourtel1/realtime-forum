@@ -1,14 +1,41 @@
 class Posts extends HTMLElement {
     constructor() {
         super();
-        this.innerHTML = posts.map(post => `
+        this.monitor = { isLoading: false, error: null };
+        this.Posts = []
+        this.getPosts();
+        this.render();
+    }
+
+    async getPosts() {
+        try {
+            this.monitor = {isLoading: true, error: null};
+            this.render();
+            const response = await fetch('/get_posts');
+            const data = await response.json();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            if (data.Error) {
+                throw new Error(data.Message);
+            }
+            this.Posts = data;
+            this.monitor = {isLoading: false, error: null};
+            this.render();
+            //this.connectedCallback();
+        } catch (error) {
+            this.monitor = {isLoading: false, error: error};
+            this.render();
+        }
+    }
+
+    render() {
+        this.innerHTML = this.Posts.map(post => `
             <article>
-                <h1>${post.title}</h1>
+                <h1>${post.Title}</h1>
                 <header>
-                    ${post.author} - #<span class="highlight">${post.category}</span>
+                    ${post.Username} - #<span class="highlight">${post.CategoryName}</span>
                 </header>
                 <section>
-                    ${post.body}
+                    ${post.Content}
                 </section>
                 <footer>
                     <span class="highlight">See Comments</span>
@@ -16,6 +43,7 @@ class Posts extends HTMLElement {
             </article>
             <div></div>
         `).join('');
+        this.innerHTML += `${this.monitor.error ? 'Error: ' + this.monitor.error : ''}${this.monitor.isLoading ? '<div class="loader">Connection to the World Wide Web</div>' : ''}`
     }
 }
 

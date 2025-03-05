@@ -93,6 +93,9 @@ class Write extends HTMLElement {
             }
             this.monitor = {isLoading: false, error: null};
             this.render();
+            const app = document.querySelector("c-app");
+            app.activePath = "/";
+            app.render();
         } catch (error) {
             this.monitor = {isLoading: false, error: error};
             this.render();

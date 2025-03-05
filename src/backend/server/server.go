@@ -19,6 +19,7 @@ func InitServer() {
 	server.Handle("/get_session", db.CheckSessionHandler)
 	server.Handle("/delete_session", db.DeleteSessionHandler)
 	server.Handle("/create_post", db.CreatePosts)
+	server.Handle("/get_posts", db.ReadPost)
 	// server.Handle("/create-user", db.CreateUser)
 	// server.Handle("/delete-user", db.DeleteUser)
 
