@@ -2,6 +2,7 @@ import "./components/app.js";
 
 export let Connected = false;
 export let User = {UserID: "", Username: ""};
+export let Ws = null;
 
 export function setConnected(value) {
     Connected = value;
@@ -11,6 +12,9 @@ export function setUser(user) {
     User = user;
 }
 
+export function setWs(ws) {
+    Ws = ws;
+}
 
 window.addEventListener("click", e => {
     if (e.target.matches("[data-link]")) {

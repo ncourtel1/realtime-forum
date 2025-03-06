@@ -1,3 +1,5 @@
+import { Ws, setWs } from "../main.js";
+
 class Connection extends HTMLElement {
     constructor() {
         super();
@@ -40,7 +42,10 @@ class Connection extends HTMLElement {
             if (data.Error) {
                 throw new Error(data.Message);
             }
-            this.categories = data;
+            setWs(new WebSocket("/ws"));
+            Ws.onopen = () => {
+                Ws.send(JSON.stringify(data));
+            };
             this.monitor = {isLoading: false, error: null};
             this.render();
             const app = document.querySelector("c-app");

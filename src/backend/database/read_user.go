@@ -51,9 +51,12 @@ func ReadUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	CreateSession(w, dbUser.ID, dbUser.Username)
-
 	// Réponse en JSON
-	CommunicationMessage(w, "Connected", false)
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(dbUser); err != nil {
+		CommunicationMessage(w, "Error encoding JSON response", true)
+		return
+	}
 
 }
 

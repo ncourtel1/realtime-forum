@@ -5,7 +5,7 @@ import "./connection.js";
 import "./register.js";
 import "./messages.js";
 import "./write.js";
-import { setConnected, setUser, User } from "../main.js";
+import { setConnected, setUser, User, Ws, setWs } from "../main.js";
 
 class App extends HTMLElement {
     constructor() {
@@ -24,6 +24,12 @@ class App extends HTMLElement {
                 throw new Error(data.Message);
             }
             if (User.username != data.username) {
+                if (!Ws) {
+                    setWs(new WebSocket("/ws"));
+                    Ws.onopen = () => {
+                        Ws.send(JSON.stringify(data));
+                    };
+                }
                 setUser(data);
                 setConnected(true);
                 const nav = document.querySelector("c-nav");
