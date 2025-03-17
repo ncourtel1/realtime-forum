@@ -1,5 +1,7 @@
 import { Ws } from "../main.js";
 
+let unreadMessages = {};
+
 class Messages extends HTMLElement {
   constructor() {
     super();
@@ -7,7 +9,6 @@ class Messages extends HTMLElement {
     this.conversations = [];
     this.currentConversationId = null;
     this.currentTargetUser = null;
-    this.unreadMessages = {};
     this.placeHolder = "...................................................................................................";
     this.render();
   }
@@ -25,7 +26,7 @@ class Messages extends HTMLElement {
         // Si c'est un tableau, c'est la liste des utilisateurs
         if (Array.isArray(data)) {
           this.users = data;
-          this.render();
+          this.updateOnlineUsers();
           return;
         }
         
@@ -41,10 +42,10 @@ class Messages extends HTMLElement {
                 this.addMessageToChat(data.message);
               } else {
                 const senderId = data.message.senderId;
-                if (!this.unreadMessages[senderId]) {
-                  this.unreadMessages[senderId] = 0;
+                if (!unreadMessages[senderId]) {
+                  unreadMessages[senderId] = 0;
                 }
-                this.unreadMessages[senderId]++;
+                unreadMessages[senderId]++;
                 this.updateUnreadNotifications();
               }
               break;
@@ -62,8 +63,8 @@ class Messages extends HTMLElement {
     this.currentTargetUser = targetUsername;
     console.log(targetId)
 
-    if (this.unreadMessages[targetId]) {
-      delete this.unreadMessages[targetId];
+    if (unreadMessages[targetId]) {
+      delete unreadMessages[targetId];
       this.updateUnreadNotifications();
     }
 
@@ -177,18 +178,35 @@ class Messages extends HTMLElement {
       const userId = parseInt(el.dataset.userId);
       const badge = el.querySelector('.unread-badge');
       
-      if (this.unreadMessages[userId]) {
+      if (unreadMessages[userId]) {
         if (!badge) {
           const newBadge = document.createElement('span');
           newBadge.className = 'unread-badge';
-          newBadge.textContent = this.unreadMessages[userId];
+          newBadge.textContent = unreadMessages[userId];
           el.appendChild(newBadge);
         } else {
-          badge.textContent = this.unreadMessages[userId];
+          badge.textContent = unreadMessages[userId];
         }
       } else if (badge) {
         badge.remove();
       }
+    });
+  }
+
+  updateOnlineUsers() {
+    const onlineUsersSection = this.querySelector('#online-users');
+    onlineUsersSection.innerHTML = this.users.map(user => 
+      `<span class="online-user" data-user-id="${user.ID}">${user.Username}${unreadMessages[user.ID] ? `<span class="highlight unread-badge"> ${unreadMessages[user.ID]}</span>` : ''}</span>`
+    ).join("");
+
+    // Réattacher les événements de clic
+    const userElements = onlineUsersSection.querySelectorAll('.online-user');
+    userElements.forEach(el => {
+      el.addEventListener('click', () => {
+        const userId = parseInt(el.dataset.userId);
+        const username = el.textContent.trim(); // Utiliser trim() pour enlever les espaces
+        this.startConversation(userId, username);
+      });
     });
   }
   
@@ -211,9 +229,6 @@ class Messages extends HTMLElement {
               Online
             </header>
             <section id="online-users">
-              ${this.users.map(user => 
-                `<span class="online-user" data-user-id="${user.ID}">${user.Username}${this.unreadMessages[user.ID] ? `<span class="highlight unread-badge"> ${this.unreadMessages[user.ID]}</span>` : ''}</span>`
-              ).join("")}
             </section>
           </article>
         </div>
