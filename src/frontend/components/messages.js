@@ -4,6 +4,7 @@ let unreadMessages = {};
 
 class Messages extends HTMLElement {
   constructor() {
+    console.log("mounted");
     super();
     this.users = [];
     this.conversations = [];
@@ -48,6 +49,16 @@ class Messages extends HTMLElement {
                   unreadMessages[senderId] = 0;
                 }
                 unreadMessages[senderId]++;
+
+                let totalUnreadMessages = 0;
+                for (let userId in unreadMessages) {
+                  totalUnreadMessages += unreadMessages[userId];
+                }
+
+                const navEvent = new CustomEvent('unreadMessagesUpdated', { 
+                  detail: { total: totalUnreadMessages } 
+                });
+                document.dispatchEvent(navEvent);
 
                 // Déplacer l'utilisateur au début de la liste
                 const userIndex = this.users.findIndex(user => user.ID === senderId);

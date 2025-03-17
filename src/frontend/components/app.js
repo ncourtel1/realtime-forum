@@ -60,7 +60,7 @@ class App extends HTMLElement {
             ${this.activePath === '/' ? '<c-posts></c-posts>' : ''}
             ${this.activePath === '/connection' ? '<c-connection></c-connection>' : ''}
             ${this.activePath === '/register' ? '<c-register></c-register>' : ''}
-            ${this.activePath === '/messages' ? '<c-messages></c-messages>' : ''}
+            <c-messages style="${this.activePath === '/messages' ? 'display: block;' : 'display: none;'}"></c-messages>
             ${this.activePath === '/write' ? '<c-write></c-write>' : ''}
         `;
     }
