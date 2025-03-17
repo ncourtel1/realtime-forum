@@ -666,6 +666,9 @@ func broadcastUsers() {
 
 			// Trier les utilisateurs par date du dernier message (du plus récent au plus ancien)
 			sort.Slice(users, func(i, j int) bool {
+				if users[i].LastMessageTime.Equal(users[j].LastMessageTime) {
+					return users[i].Username < users[j].Username
+				}
 				return users[i].LastMessageTime.After(users[j].LastMessageTime)
 			})
 
