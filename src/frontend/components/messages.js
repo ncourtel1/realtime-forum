@@ -40,13 +40,25 @@ class Messages extends HTMLElement {
             case 'message':
               if (data.conversationId === this.currentConversationId) {
                 this.addMessageToChat(data.message);
-              } else {
+              }  else {
                 const senderId = data.message.senderId;
+
+                // Incrémenter les messages non lus pour cet utilisateur
                 if (!unreadMessages[senderId]) {
                   unreadMessages[senderId] = 0;
                 }
                 unreadMessages[senderId]++;
+
+                // Déplacer l'utilisateur au début de la liste
+                const userIndex = this.users.findIndex(user => user.ID === senderId);
+                if (userIndex !== -1) {
+                  const [user] = this.users.splice(userIndex, 1); // Retirer l'utilisateur de sa position actuelle
+                  this.users.unshift(user); // Ajouter l'utilisateur au début de la liste
+                }
+
+                // Mettre à jour les notifications et la liste des utilisateurs
                 this.updateUnreadNotifications();
+                this.updateOnlineUsers();
               }
               break;
             default:

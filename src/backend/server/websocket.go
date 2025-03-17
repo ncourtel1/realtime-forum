@@ -356,6 +356,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sort"
 	"sync"
 	"time"
 
@@ -637,31 +638,88 @@ func handlePrivateMessages() {
 	}
 }
 
-// Boucle de diffusion des utilisateurs (inchangée)
 func broadcastUsers() {
 	for {
 		<-broadcast // Attend une mise à jour
 		mutex.Lock()
-		var users []db.User
+
+		// Pour chaque client connecté
 		for client := range clients {
-			users = append(users, db.User{ID: client.ID, Username: client.Username})
-		}
-		fmt.Println(users)
-		mutex.Unlock()
-		userListJSON, err := json.Marshal(users)
-		if err != nil {
-			fmt.Println("Erreur d'encodage JSON:", err)
-			continue
-		}
-		// Envoie le JSON à tous les clients
-		mutex.Lock()
-		for client := range clients {
-			err := client.Conn.WriteMessage(websocket.TextMessage, userListJSON)
+			var users []struct {
+				db.User
+				LastMessageTime time.Time
+			}
+
+			// Récupérer tous les autres utilisateurs en ligne
+			for otherClient := range clients {
+				if otherClient.ID != client.ID {
+					lastMessageTime := getLastMessageTime(client.ID, otherClient.ID)
+					users = append(users, struct {
+						db.User
+						LastMessageTime time.Time
+					}{
+						User:            db.User{ID: otherClient.ID, Username: otherClient.Username},
+						LastMessageTime: lastMessageTime,
+					})
+				}
+			}
+
+			// Trier les utilisateurs par date du dernier message (du plus récent au plus ancien)
+			sort.Slice(users, func(i, j int) bool {
+				return users[i].LastMessageTime.After(users[j].LastMessageTime)
+			})
+
+			// Créer la liste finale des utilisateurs (sans la date du dernier message)
+			var sortedUsers []db.User
+			for _, u := range users {
+				sortedUsers = append(sortedUsers, u.User)
+			}
+
+			// Envoyer la liste triée à ce client spécifique
+			userListJSON, err := json.Marshal(sortedUsers)
+			if err != nil {
+				fmt.Println("Erreur d'encodage JSON:", err)
+				continue
+			}
+
+			err = client.Conn.WriteMessage(websocket.TextMessage, userListJSON)
 			if err != nil {
 				client.Conn.Close()
 				delete(clients, client)
 			}
 		}
+
 		mutex.Unlock()
 	}
+}
+
+// Fonction pour obtenir la date du dernier message entre deux utilisateurs
+func getLastMessageTime(user1ID, user2ID int) time.Time {
+	database := db.SetupDatabase()
+	defer database.Close()
+
+	var lastMessageTimeStr string
+	err := database.QueryRow(`
+        SELECT MAX(sent_at) 
+        FROM messages 
+        WHERE conversation_id IN (
+            SELECT id 
+            FROM conversations 
+            WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)
+        )
+    `, user1ID, user2ID, user2ID, user1ID).Scan(&lastMessageTimeStr)
+
+	if err != nil {
+		// En cas d'erreur ou s'il n'y a pas de message, retourner une date très ancienne
+		return time.Time{}
+	}
+
+	// Convertir la chaîne de caractères en time.Time
+	lastMessageTime, err := time.Parse("2006-01-02 15:04:05.999999999-07:00", lastMessageTimeStr)
+	if err != nil {
+		fmt.Println("Erreur lors de la conversion de la date:", err)
+		return time.Time{}
+	}
+
+	return lastMessageTime
 }
