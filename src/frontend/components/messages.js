@@ -9,6 +9,8 @@ class Messages extends HTMLElement {
     this.users = [];
     this.conversations = [];
     this.currentConversationId = null;
+    this.displayedCount = 10;
+    this.messages = [];
     this.currentTargetUser = null;
     this.placeHolder = "...................................................................................................";
     this.render();
@@ -110,11 +112,15 @@ class Messages extends HTMLElement {
   renderMessages(messages) {
     const rightSection = this.querySelector('.right');
     rightSection.innerHTML = '';
+  
+    this.messages = messages; // Stocker tous les messages
+    this.displayedCount = Math.min(10, messages.length); // Commencer par afficher les 10 derniers messages
     
-    messages.forEach(msg => {
-      this.addMessageToChat(msg, false);
-    });
-    
+    if (this.messages.length > 0) {
+      // Afficher les derniers messages
+      this.displayMessages();
+    }
+  
     // Ajouter la zone de saisie
     const inputArea = document.createElement('div');
     inputArea.className = 'message-input-area';
@@ -126,7 +132,7 @@ class Messages extends HTMLElement {
       </label>
     `;
     rightSection.appendChild(inputArea);
-    
+  
     // Ajouter l'événement d'envoi
     const input = rightSection.querySelector('#message-input');
     input.addEventListener('keypress', (event) => {
@@ -135,7 +141,95 @@ class Messages extends HTMLElement {
         input.value = '';
       }
     });
+  
+    // Défiler vers le bas pour voir les messages les plus récents
+    rightSection.scrollTop = rightSection.scrollHeight;
+    // Ajouter gestion du scroll pour charger plus de messages avec throttle
+    rightSection.addEventListener('scroll', this.throttle(() => {
+      if (rightSection.scrollTop < 30 && this.displayedCount < this.messages.length) {
+        this.loadMoreMessages();
+      }
+    }, 10));
   }
+  
+  // Fonction throttle pour limiter les appels
+  throttle(func, limit) {
+    let lastCall = 0;
+    return function (...args) {
+      const now = Date.now();
+      if (now - lastCall >= limit) {
+        lastCall = now;
+        func.apply(this, args);
+      }
+    };
+  }
+  
+  // Méthode pour afficher les messages actuellement sélectionnés
+  displayMessages() {
+    const rightSection = this.querySelector('.right');
+    
+    // Supprimer tous les messages existants (mais pas l'input)
+    const inputArea = rightSection.querySelector('.message-input-area');
+    const messages = Array.from(rightSection.querySelectorAll('article'));
+    messages.forEach(msg => msg.remove());
+    
+    // Afficher les messages sélectionnés
+    const messagesToShow = this.messages.slice(-this.displayedCount);
+    messagesToShow.forEach(msg => {
+      this.addMessageToChat(msg, false);
+    });
+    
+    // Assurer que l'input est toujours après les messages
+    if (inputArea && inputArea.parentNode === rightSection) {
+      rightSection.appendChild(inputArea);
+    }
+    
+    console.log(`Affichage de ${messagesToShow.length} messages sur ${this.messages.length} au total`);
+  }
+  
+  // Gestionnaire de scroll avec debugging
+  handleScroll(event) {
+    const rightSection = this.querySelector('.right');
+    
+    // Ajouter du debug
+    console.log("Scroll position:", rightSection.scrollTop);
+    
+    // Vérifier si on est proche du haut
+    if (rightSection.scrollTop < 30 && this.displayedCount < this.messages.length) {
+      console.log("Près du haut, chargement de plus de messages...");
+      this.loadMoreMessages();
+    }
+  }
+  
+  // Fonction pour charger plus de messages
+  loadMoreMessages() {
+    const rightSection = this.querySelector('.right');
+    const oldScrollHeight = rightSection.scrollHeight;
+    
+    // Augmenter le nombre de messages à afficher
+    const oldDisplayedCount = this.displayedCount;
+    this.displayedCount = Math.min(this.displayedCount + 10, this.messages.length);
+    
+    // Ne rien faire si pas de nouveaux messages à ajouter
+    if (oldDisplayedCount === this.displayedCount) {
+      console.log("Aucun nouveau message à charger");
+      return;
+    }
+    
+    console.log(`Chargement de ${this.displayedCount - oldDisplayedCount} messages supplémentaires`);
+    
+    // Réafficher les messages avec le nouveau compte
+    this.displayMessages();
+    
+    // Ajuster la position du scroll pour maintenir la position relative
+    setTimeout(() => {
+      const newScrollHeight = rightSection.scrollHeight;
+      const newScrollTop = newScrollHeight - oldScrollHeight;
+      rightSection.scrollTop = newScrollTop > 0 ? newScrollTop : 0;
+      console.log("Nouvelle position de scroll:", newScrollTop);
+    }, 10);
+  }
+  
 
   addMessageToChat(message, append = true) {
     const rightSection = this.querySelector('.right');
@@ -276,137 +370,3 @@ class Messages extends HTMLElement {
 }
 
 customElements.define("c-messages", Messages);
-
-// class Messages extends HTMLElement {
-//     constructor() {
-//         super();
-//         this.ws = null;
-//         this.user = "Jean Bono"; // Simuler l'utilisateur actuel
-//         this.activeConversation = 0;
-//         this.conversations = [
-//             { id: 1, name: "John Doe" },
-//             { id: 2, name: "Alice Smith" }
-//         ];
-//         this.messages = {}; // Stocke les messages par conversation
-//         this.placeHolder = "Tapez votre message...";
-//         this.render();
-//     }
-
-//     connectedCallback() {
-//         this.setupWebSocket();
-//         this.addEventListeners();
-//     }
-
-//     setupWebSocket() {
-//         this.ws = new WebSocket("/ws"); // Remplace par ton URL WebSocket
-
-//         this.ws.onopen = () => {
-//             console.log("WebSocket connecté !");
-            
-//             // Envoyer immédiatement l'ID de conversation active
-//             //if (this.activeConversation) {
-//             //    this.ws.send(JSON.stringify({ conversation_id: this.activeConversation }));
-//             //}
-//         };
-        
-//         this.ws.onmessage = (event) => {
-//             const message = JSON.parse(event.data);
-//             console.log(message)
-//             this.receiveMessage(message);
-//         };
-
-//         this.ws.onclose = () => console.log("WebSocket déconnecté !");
-//     }
-
-//     addEventListeners() {
-//         this.querySelectorAll(".conversation").forEach(span => {
-//             span.onclick = () => {
-//                 this.activeConversation = parseInt(span.dataset.id);
-//                 console.log(this.activeConversation)
-//                 this.render();
-//             };
-//         });
-
-//         const input = this.querySelector(".message-input");
-//         const sendButton = this.querySelector(".message-send");
-
-//         if (sendButton && input) {
-//             sendButton.onclick = () => {
-//                 this.sendMessage(input.value);
-//                 input.value = "";
-//             };
-//         }
-//     }
-
-//     sendMessage(content) {
-//         if (!this.activeConversation || !content.trim()) return;
-
-//         const message = {
-//             conversation_id: this.activeConversation,
-//             sender: this.user,
-//             content: content,
-//             timestamp: new Date().toISOString()
-//         };
-
-//         console.log(message);
-
-//         this.ws.send(JSON.stringify(message));
-//         //this.receiveMessage(message); // Ajouter le message localement
-//     }
-
-//     receiveMessage(message) {
-//         const { conversation_id } = message;
-//         if (!this.messages[conversation_id]) {
-//             this.messages[conversation_id] = [];
-//         }
-//         this.messages[conversation_id].push(message);
-//         this.render();
-//     }
-
-//     render() {
-//         this.innerHTML = `
-//             <div class="messages">
-//                 <div class="left">
-//                     <article>
-//                         <header>Conversations</header>
-//                         <section>
-//                             ${this.conversations.map(conv => `
-//                                 <span class="conversation" data-id="${conv.id}">
-//                                     ${conv.name}
-//                                 </span>
-//                             `).join('')}
-//                         </section>
-//                     </article>
-//                 </div>
-//                 <div class="right">
-//                     ${this.activeConversation ? this.renderConversation() : "<p>Sélectionnez une conversation</p>"}
-//                 </div>
-//             </div>
-//         `;
-
-//         this.addEventListeners();
-//     }
-
-//     renderConversation() {
-//         const messages = this.messages[this.activeConversation] || [];
-
-//         return `
-//             <div>
-//                 ${messages.map(msg => `
-//                     <article class="${msg.sender === this.user ? "sender" : "receiver"}">
-//                         <header>${new Date(msg.timestamp).toLocaleString()} - ${msg.sender}</header>
-//                         <section>${msg.content}</section>
-//                     </article>
-//                 `).join('')}
-//                 <div class="y_spacer"></div>
-//                 <label>
-//                     Message:
-//                     <input class="message-input" placeholder="${this.placeHolder}"/>
-//                     <button class="message-send">Envoyer</button>
-//                 </label>
-//             </div>
-//         `;
-//     }
-// }
-
-// customElements.define("c-messages", Messages);
