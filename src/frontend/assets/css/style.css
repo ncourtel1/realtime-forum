@@ -229,6 +229,12 @@ hr {
     color: var(--background);
 }
 
+.unread-badge {
+    padding-left: 1rem;
+    background-color: var(--accent);
+    color: var(--background);
+}
+
 .loader {
     position: fixed;
     inset: 0;

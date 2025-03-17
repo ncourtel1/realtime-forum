@@ -7,6 +7,7 @@ class Messages extends HTMLElement {
     this.conversations = [];
     this.currentConversationId = null;
     this.currentTargetUser = null;
+    this.unreadMessages = {};
     this.placeHolder = "...................................................................................................";
     this.render();
   }
@@ -38,6 +39,13 @@ class Messages extends HTMLElement {
             case 'message':
               if (data.conversationId === this.currentConversationId) {
                 this.addMessageToChat(data.message);
+              } else {
+                const senderId = data.message.senderId;
+                if (!this.unreadMessages[senderId]) {
+                  this.unreadMessages[senderId] = 0;
+                }
+                this.unreadMessages[senderId]++;
+                this.updateUnreadNotifications();
               }
               break;
             default:
@@ -53,6 +61,12 @@ class Messages extends HTMLElement {
   startConversation(targetId, targetUsername) {
     this.currentTargetUser = targetUsername;
     console.log(targetId)
+
+    if (this.unreadMessages[targetId]) {
+      delete this.unreadMessages[targetId];
+      this.updateUnreadNotifications();
+    }
+
     Ws.send(JSON.stringify({
       type: 'startConversation',
       targetId: targetId
@@ -156,6 +170,29 @@ class Messages extends HTMLElement {
     }));
   }
 
+  updateUnreadNotifications() {
+    const userElements = this.querySelectorAll('.online-user');
+    
+    userElements.forEach(el => {
+      const userId = parseInt(el.dataset.userId);
+      const badge = el.querySelector('.unread-badge');
+      
+      if (this.unreadMessages[userId]) {
+        if (!badge) {
+          const newBadge = document.createElement('span');
+          newBadge.className = 'unread-badge';
+          newBadge.textContent = this.unreadMessages[userId];
+          el.appendChild(newBadge);
+        } else {
+          badge.textContent = this.unreadMessages[userId];
+        }
+      } else if (badge) {
+        badge.remove();
+      }
+    });
+  }
+  
+
   render() {
     this.innerHTML = `
       <div class="messages">
@@ -175,7 +212,7 @@ class Messages extends HTMLElement {
             </header>
             <section id="online-users">
               ${this.users.map(user => 
-                `<span class="online-user" data-user-id="${user.ID}">${user.Username}</span>`
+                `<span class="online-user" data-user-id="${user.ID}">${user.Username}${this.unreadMessages[user.ID] ? `<span class="highlight unread-badge"> ${this.unreadMessages[user.ID]}</span>` : ''}</span>`
               ).join("")}
             </section>
           </article>

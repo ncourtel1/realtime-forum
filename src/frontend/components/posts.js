@@ -53,7 +53,7 @@ class Posts extends HTMLElement {
             this.render();
             //this.connectedCallback();
         } catch (error) {
-            this.monitor = {isLoading: false, error: error};
+            this.monitor = {isLoading: false, error: error.message};
             this.render();
         }
     }
