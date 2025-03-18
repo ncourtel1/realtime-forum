@@ -84,6 +84,10 @@ class Messages extends HTMLElement {
     };
   }
 
+  isImageURL(url) {
+    return(url.match(/\.(jpeg|jpg|gif|png)$/) != null);
+  }
+
   startConversation(targetId, targetUsername) {
     this.currentTargetUser = targetUsername;
     console.log(targetId)
@@ -258,7 +262,7 @@ class Messages extends HTMLElement {
         ${date} - ${username}
       </header>
       <section>
-        ${message.content}
+        ${this.isImageURL(message.content) ? `<img src="${message.content}" />` : message.content}
       </section>
     `;
     
