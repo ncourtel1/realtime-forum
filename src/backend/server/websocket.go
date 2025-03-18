@@ -497,6 +497,27 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 				Message:        savedMsg,
 			}
 		}
+
+		if msgType, ok := msgData["type"].(string); ok && msgType == "typing" {
+			var msg struct {
+				ConversationID int `json:"conversationId"`
+			}
+			err = json.Unmarshal(message, &msg)
+			if err != nil {
+				continue
+			}
+
+			newMsg := Message{
+				Content:   "typing",
+				SenderID:  client.ID,
+				Timestamp: time.Now(),
+			}
+
+			privateMsg <- PrivateMessage{
+				ConversationID: msg.ConversationID,
+				Message:        newMsg,
+			}
+		}
 	}
 
 	// Supprime le client à la déconnexion

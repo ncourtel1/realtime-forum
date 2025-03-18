@@ -42,7 +42,12 @@ class Messages extends HTMLElement {
               break;
             case 'message':
               if (data.conversationId === this.currentConversationId) {
-                this.addMessageToChat(data.message);
+                if (data.message.content == "typing") {
+                  this.handleTyping();
+                } else {
+                  console.log(data.message)
+                  this.addMessageToChat(data.message);
+                }
               }  else {
                 const senderId = data.message.senderId;
 
@@ -87,6 +92,35 @@ class Messages extends HTMLElement {
   isImageURL(url) {
     return(url.match(/\.(jpeg|jpg|gif|png)$/) != null);
   }
+
+  handleTyping() {
+    const rightSection = this.querySelector('.right');
+    if (!rightSection) return;
+  
+    // Vérifiez si un indicateur de frappe existe déjà
+    let typingIndicator = rightSection.querySelector('.typing-indicator');
+    if (!typingIndicator) {
+      // Créer un élément pour indiquer que l'utilisateur est en train d'écrire
+      typingIndicator = document.createElement('div');
+      typingIndicator.className = 'typing-indicator';
+      typingIndicator.textContent = 'Typing...';
+  
+      // Ajouter l'indicateur de frappe à la fin de la section droite
+      rightSection.appendChild(typingIndicator);
+  
+      // Défiler vers le bas pour voir l'indicateur de frappe
+      rightSection.scrollTop = rightSection.scrollHeight;
+    }
+  
+    // Optionnel : Supprimer l'indicateur après un certain délai (par exemple, 3 secondes)
+    clearTimeout(this.typingTimeout); // Réinitialiser le timeout précédent s'il existe
+    this.typingTimeout = setTimeout(() => {
+      if (typingIndicator) {
+        typingIndicator.remove();
+      }
+    }, 1000); // Supprime l'indicateur après 3 secondes
+  }
+  
 
   startConversation(targetId, targetUsername) {
     this.currentTargetUser = targetUsername;
@@ -145,6 +179,10 @@ class Messages extends HTMLElement {
         input.value = '';
       }
     });
+
+    input.addEventListener('input', () => {
+      this.sendMessage("typing");
+    })
   
     // Défiler vers le bas pour voir les messages les plus récents
     rightSection.scrollTop = rightSection.scrollHeight;
@@ -284,12 +322,19 @@ class Messages extends HTMLElement {
 
   sendMessage(content) {
     if (!content.trim() || !this.currentConversationId) return;
-    
-    Ws.send(JSON.stringify({
-      type: 'message',
-      conversationId: this.currentConversationId,
-      content: content
-    }));
+
+    if (content === "typing") {
+      Ws.send(JSON.stringify({
+        type: 'typing',
+        conversationId: this.currentConversationId,
+      }));
+    } else {
+      Ws.send(JSON.stringify({
+        type: 'message',
+        conversationId: this.currentConversationId,
+        content: content
+      }));
+    }
   }
 
   updateUnreadNotifications() {
