@@ -160,6 +160,10 @@ c-messages input {
   max-height: 500px; /* Ajuste la hauteur selon ton besoin */
 }
 
+.msg_header {
+  font-size: 0.7rem;
+}
+
 c-messages .right header {
   width: 100%;
 }

@@ -1,4 +1,4 @@
-import { Ws } from "../main.js";
+import { Ws, User } from "../main.js";
 
 let unreadMessages = {};
 
@@ -43,7 +43,8 @@ class Messages extends HTMLElement {
             case 'message':
               if (data.conversationId === this.currentConversationId) {
                 if (data.message.content == "typing") {
-                  this.handleTyping();
+                  console.log(User.User, data.message.senderId)
+                  if (User.UserID !== data.message.senderId) this.handleTyping();
                 } else {
                   console.log(data.message)
                   this.addMessageToChat(data.message);
@@ -296,7 +297,7 @@ class Messages extends HTMLElement {
     }
     
     article.innerHTML = `
-      <header>
+      <header class="msg_header">
         ${date} - ${username}
       </header>
       <section>
@@ -383,15 +384,6 @@ class Messages extends HTMLElement {
         <div class="left">
           <article>
             <header>
-              Conversations
-            </header>
-            <section id="conversations-list">
-              <span>John Does</span>
-              <span>Jean Bono</span>
-            </section>
-          </article>
-          <article>
-            <header>
               Online
             </header>
             <section id="online-users">
@@ -400,7 +392,7 @@ class Messages extends HTMLElement {
         </div>
         <div class="right">
           <div class="start-chat-message">
-            Sélectionnez un utilisateur pour démarrer une conversation
+            Select a user
           </div>
         </div>
       </div>

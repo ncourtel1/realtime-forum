@@ -2,6 +2,7 @@ import "./components/app.js";
 
 export let Connected = false;
 export let User = {UserID: "", Username: ""};
+export let initialUsers;
 export let Ws = null;
 
 export function setConnected(value) {
@@ -9,7 +10,8 @@ export function setConnected(value) {
 }
 
 export function setUser(user) {
-    User = user;
+    User.UserID = user.userID;
+    User.Username = user.username;
 }
 
 export function setWs(ws) {

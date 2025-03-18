@@ -11,7 +11,7 @@ class Title extends HTMLElement {
         this.innerHTML = `
             <div>
             #<span class="highlight">,,,</span>
-            ${User.username !== undefined ? `<span style="margin-left: 10px;">${User.username}</span>` : ''}
+            ${User.Username !== undefined ? `<span style="margin-left: 10px;">${User.Username}</span>` : ''}
             <span class="spacer"></span>
                 <a href="/" data-link>${title}</a>
             </div>

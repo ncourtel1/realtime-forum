@@ -23,7 +23,7 @@ class App extends HTMLElement {
             if (data.Error) {
                 throw new Error(data.Message);
             }
-            if (User.username != data.username) {
+            if (User.Username != data.username) {
                 if (!Ws) {
                     setWs(new WebSocket("/ws"));
                     Ws.onopen = () => {
