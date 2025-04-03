@@ -42,12 +42,13 @@ class App extends HTMLElement {
             if (User.Username != "") {
                 setUser({UserID: "", Username: ""});
                 setConnected(false);
-                this.render();
+                //this.render();
             }
         }
     }
 
     render() {
+        console.log("active path: ", this.activePath);
         this.checkSession();
         this.activePath === '/' ? document.title = "3615 - Home" :
         this.activePath === '/connection' ? document.title = "3615 - Connection" :
