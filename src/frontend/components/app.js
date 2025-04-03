@@ -38,7 +38,7 @@ class App extends HTMLElement {
                 title.render();
             }
         } catch (error) {
-            this.activePath = "/";
+            //this.activePath = "/";
             if (User.Username != "") {
                 setUser({UserID: "", Username: ""});
                 setConnected(false);
@@ -48,6 +48,7 @@ class App extends HTMLElement {
     }
 
     render(check = true) {
+        console.log(this.activePath);
         if (check) this.checkSession();
         this.activePath === '/' ? document.title = "3615 - Home" :
         this.activePath === '/connection' ? document.title = "3615 - Connection" :

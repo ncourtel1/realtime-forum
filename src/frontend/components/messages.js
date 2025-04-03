@@ -25,10 +25,22 @@ class Messages extends HTMLElement {
     Ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        
+        console.log(data);
         // Si c'est un tableau, c'est la liste des utilisateurs
         if (Array.isArray(data)) {
-          this.users = data;
+          // Mettre à jour la liste des utilisateurs
+          // D'abord, on retire les utilisateurs qui ne sont plus dans la nouvelle liste
+          this.users = this.users.filter(user => data.some(newUser => newUser.ID === user.ID));
+        
+          // Ajouter les nouveaux utilisateurs qui ne sont pas déjà présents
+          data.forEach(user => {
+            const userIndex = this.users.findIndex(u => u.ID === user.ID);
+            if (userIndex === -1) { // Si l'utilisateur n'existe pas déjà
+              this.users.push(user); // Ajouter l'utilisateur à la liste
+            }
+          });
+        
+          // Mettre à jour l'affichage des utilisateurs en ligne
           this.updateOnlineUsers();
           return;
         }

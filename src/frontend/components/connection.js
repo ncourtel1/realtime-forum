@@ -6,6 +6,7 @@ class Connection extends HTMLElement {
         this.User = {Username: "", Password: ""}
         this.monitor = { isLoading: false, error: null };
         this.placeHolder = "...................................................................................................";
+        console.log("connection mounted");
         this.render();
     }
 

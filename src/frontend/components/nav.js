@@ -1,4 +1,4 @@
-import { Connected, setConnected } from "../main.js";
+import { Connected, setConnected, Ws } from "../main.js";
 
 class Nav extends HTMLElement {
     constructor() {
@@ -31,6 +31,7 @@ class Nav extends HTMLElement {
                 throw new Error(data.Message);
             }
             setConnected(false);
+            Ws.close();
             const app = document.querySelector("c-app");
             app.activePath = "/"
             app.render();
