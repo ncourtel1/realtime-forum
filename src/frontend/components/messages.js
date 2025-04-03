@@ -40,46 +40,45 @@ class Messages extends HTMLElement {
               this.currentConversationId = data.conversationId;
               if (data.messages) this.renderMessages(data.messages);
               break;
-            case 'message':
-              if (data.conversationId === this.currentConversationId) {
-                if (data.message.content == "typing") {
-                  console.log(User.User, data.message.senderId)
-                  if (User.UserID !== data.message.senderId) this.handleTyping();
+              case 'message':
+                if (data.conversationId === this.currentConversationId) {
+                  if (data.message.content == "typing") {
+                    console.log(User.User, data.message.senderId)
+                    if (User.UserID !== data.message.senderId) this.handleTyping();
+                  } else {
+                    this.addMessageToChat(data.message);
+                  }
                 } else {
-                  console.log(data.message)
-                  this.addMessageToChat(data.message);
+                  if (data.message.content !== "typing") {  // Ne compte pas les messages "typing"
+                    const senderId = data.message.senderId;
+              
+                    if (!unreadMessages[senderId]) {
+                      unreadMessages[senderId] = 0;
+                    }
+                    unreadMessages[senderId]++;
+              
+                    let totalUnreadMessages = 0;
+                    for (let userId in unreadMessages) {
+                      totalUnreadMessages += unreadMessages[userId];
+                    }
+              
+                    const navEvent = new CustomEvent('unreadMessagesUpdated', { 
+                      detail: { total: totalUnreadMessages } 
+                    });
+                    document.dispatchEvent(navEvent);
+              
+                    // Déplacer l'utilisateur en haut de la liste
+                    const userIndex = this.users.findIndex(user => user.ID === senderId);
+                    if (userIndex !== -1) {
+                      const [user] = this.users.splice(userIndex, 1);
+                      this.users.unshift(user);
+                    }
+              
+                    this.updateUnreadNotifications();
+                    this.updateOnlineUsers();
+                  }
                 }
-              }  else {
-                const senderId = data.message.senderId;
-
-                // Incrémenter les messages non lus pour cet utilisateur
-                if (!unreadMessages[senderId]) {
-                  unreadMessages[senderId] = 0;
-                }
-                unreadMessages[senderId]++;
-
-                let totalUnreadMessages = 0;
-                for (let userId in unreadMessages) {
-                  totalUnreadMessages += unreadMessages[userId];
-                }
-
-                const navEvent = new CustomEvent('unreadMessagesUpdated', { 
-                  detail: { total: totalUnreadMessages } 
-                });
-                document.dispatchEvent(navEvent);
-
-                // Déplacer l'utilisateur au début de la liste
-                const userIndex = this.users.findIndex(user => user.ID === senderId);
-                if (userIndex !== -1) {
-                  const [user] = this.users.splice(userIndex, 1); // Retirer l'utilisateur de sa position actuelle
-                  this.users.unshift(user); // Ajouter l'utilisateur au début de la liste
-                }
-
-                // Mettre à jour les notifications et la liste des utilisateurs
-                this.updateUnreadNotifications();
-                this.updateOnlineUsers();
-              }
-              break;
+                break;              
             default:
               console.log("Message non géré:", data);
           }
