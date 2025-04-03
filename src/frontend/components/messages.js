@@ -43,6 +43,10 @@ class Messages extends HTMLElement {
           // Mettre à jour l'affichage des utilisateurs en ligne
           this.updateOnlineUsers();
           return;
+        } else if (data === null) {
+          this.users = [];
+          this.updateOnlineUsers();
+          return;
         }
         
         // Si c'est un objet avec un type, gérer en fonction du type
@@ -55,8 +59,9 @@ class Messages extends HTMLElement {
               case 'message':
                 if (data.conversationId === this.currentConversationId) {
                   if (data.message.content == "typing") {
-                    console.log(User.User, data.message.senderId)
-                    if (User.UserID !== data.message.senderId) this.handleTyping();
+                    if (User.UserID !== data.message.senderId) {
+                      this.handleTyping(data.message.senderId);
+                    }
                   } else {
                     this.addMessageToChat(data.message);
                   }
@@ -105,9 +110,12 @@ class Messages extends HTMLElement {
     return(url.match(/\.(jpeg|jpg|gif|png)$/) != null);
   }
 
-  handleTyping() {
+  handleTyping(senderId) {
     const rightSection = this.querySelector('.right');
     if (!rightSection) return;
+
+    const user = this.users.find(user => user.ID === senderId);
+    const username = user ? user.Username : "Inconnu"; 
   
     // Vérifiez si un indicateur de frappe existe déjà
     let typingIndicator = rightSection.querySelector('.typing-indicator');
@@ -115,7 +123,7 @@ class Messages extends HTMLElement {
       // Créer un élément pour indiquer que l'utilisateur est en train d'écrire
       typingIndicator = document.createElement('div');
       typingIndicator.className = 'typing-indicator';
-      typingIndicator.textContent = 'Typing...';
+      typingIndicator.textContent = `${username} est en train d'écrire...`;
   
       // Ajouter l'indicateur de frappe à la fin de la section droite
       rightSection.appendChild(typingIndicator);
