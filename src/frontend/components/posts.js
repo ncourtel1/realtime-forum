@@ -1,3 +1,5 @@
+import { Connected } from "../main.js";
+
 class Posts extends HTMLElement {
     constructor() {
         super();
@@ -129,13 +131,16 @@ class Posts extends HTMLElement {
                 <footer>
                     <span class="highlight comments-toggle" data-post-id="${post.Id}">${this.areCommentsExpanded.has(post.Id.toString()) ? 'Hide' : 'See'} Comments</span>
                 </footer>
-                ${this.areCommentsExpanded.has(post.Id.toString()) ?
+                ${this.areCommentsExpanded.has(post.Id.toString()) && Connected ?
                     `<label>
                         New Comment:
                         <input type="text" class="comment-input" data-post-id="${post.Id}" placeholder="${this.placeHolder}" />
                         <button class="comment-send">Send</button>
-                    </label>
-                    ${this.Comments.filter(c => c.Post_id === post.Id).map(comment => {
+                    </label>` 
+                    : ''
+                }
+                ${this.areCommentsExpanded.has(post.Id.toString()) ? 
+                    this.Comments.filter(c => c.Post_id === post.Id).map(comment => {
                         return `<article>
                             <header>
                                 ${comment.Username}<span style="font-size: 12px;"> - ${this.formatDate(new Date(comment.Created_at))}</span>
@@ -144,8 +149,10 @@ class Posts extends HTMLElement {
                                 ${comment.Content}
                             </section>
                         </article>`;
-                    }).join('')}` :
-                    ``}
+                    }).join('')
+                    : ''
+                }
+                
             </article>
             <div></div>
         `).join('');
